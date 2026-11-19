@@ -68,7 +68,7 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--mode", choices=["eval", "train"], default="eval")
 
     sub.add_parser("build-dataset", help="rebuild episodes/, episodes.jsonl, trajectories.jsonl")
-    sub.add_parser("report", help="write reports/FAILURE_ANALYSIS.md")
+    sub.add_parser("report", help="write reports/FAILURE_ANALYSIS.md and LEAK_AUDIT.md")
     p_demo = sub.add_parser("demo", help="watch a scripted auditor work through one episode")
     p_demo.add_argument("--seed", type=int, default=28112026)
     p_demo.add_argument("--config", default="jury_like")
@@ -105,9 +105,12 @@ def main(argv: list[str] | None = None) -> int:
         from .harness.reports import failure_analysis_md
         out = REPO_ROOT / "reports"
         out.mkdir(exist_ok=True)
+        from .harness.leak_audit import leak_audit_md
         (out / "FAILURE_ANALYSIS.md").write_text(failure_analysis_md(), encoding="utf-8",
                                                 newline="\n")
+        (out / "LEAK_AUDIT.md").write_text(leak_audit_md(), encoding="utf-8", newline="\n")
         print(out / "FAILURE_ANALYSIS.md")
+        print(out / "LEAK_AUDIT.md")
         return 0
     if args.command == "build-dataset":
         from .checks import REPO_ROOT

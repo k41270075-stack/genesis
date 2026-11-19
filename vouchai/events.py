@@ -332,7 +332,8 @@ def make_payments(world: World, stream: Stream, invoices: list[Invoice]) -> list
                 extra = nice_price(s.randint(2_000, 30_000), base, s)
                 add(inv.customer, base, moment, amount + extra, 0, [(inv.key, amount)],
                     excess_account="2200")
-                refund_at = moment + timedelta(days=s.randint(2, 9), seconds=s.randbelow(86_400))
+                # >= 4 days: the overpayment (delay <= 3 days) is always posted first (I18)
+                refund_at = moment + timedelta(days=s.randint(4, 10), seconds=s.randbelow(86_400))
                 if ok(refund_at):
                     add(inv.customer, base, refund_at, -extra, 0, [], excess_account="2200")
                 break

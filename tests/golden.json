@@ -9,15 +9,15 @@
   {
     "seed": 1,
     "config": "L5",
-    "episode_id": "ep_CLSE4U2YPIB24B44",
-    "tables_sha256": "9f8705ab882a78e2ee43a3d304828b40e5eb3552d88e035f8954db2814908a17",
+    "episode_id": "ep_APCLVHVDPTAESOV5",
+    "tables_sha256": "c4b8531a6b5bfc7da349439ee74e5d1bded7c5869616a9d9f440a7952e5b3696",
     "issues": 12
   },
   {
     "seed": 2,
     "config": "clean",
-    "episode_id": "ep_YBFASUDARNZVMY6N",
-    "tables_sha256": "61baf57cba8e11ada11e269c85d3b6a95478815aeaba62b9b7f287a4ff674d18",
+    "episode_id": "ep_EAFG3RWPS3SKHXRA",
+    "tables_sha256": "a1636c22f8a009ca3643d41d96178d7716b1bae4ad9bf8c898d7399a98918792",
     "issues": 0
   },
   {
