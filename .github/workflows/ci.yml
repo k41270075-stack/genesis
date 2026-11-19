@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: check (${{ matrix.os }}, py${{ matrix.python }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.10" }
+          - { os: ubuntu-latest, python: "3.11" }
+          - { os: ubuntu-latest, python: "3.12" }
+          - { os: windows-latest, python: "3.11" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: check (Linux)
+        if: runner.os == 'Linux'
+        env:
+          PYTHONHASHSEED: "0"
+        run: python -m vouchai check --out "$RUNNER_TEMP/vouchai"
+
+      - name: check from a Cyrillic path with spaces (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $dst = Join-Path $env:RUNNER_TEMP "Жұмыс үстелі\genesis copy"
+          New-Item -ItemType Directory -Force $dst | Out-Null
+          Copy-Item -Recurse -Force -Path * -Destination $dst
+          Set-Location $dst
+          python -m vouchai check
+
+  lint:
+    runs-on: ubuntu-latest
+    # Advisory until the first clean run; the official check never needs ruff.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff==0.6.9
+      - run: ruff check .
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: docker build -t vouchai .
+      - name: base image digest (to pin in the Dockerfile)
+        run: docker image inspect python:3.11-slim --format '{{index .RepoDigests 0}}'
+      - name: official one-command check, no network, 2 CPU, 4 GB
+        run: |
+          start=$(date +%s)
+          docker run --rm --network none --read-only --tmpfs /tmp \
+            --cpus 2 --memory 4g vouchai check
+          echo "wall time: $(( $(date +%s) - start )) s"
