@@ -158,8 +158,12 @@ class LocalEnv:
             return self._after_tool(self._envelope(None, "MALFORMED_ACTION"))
 
         if parsed["action"] == "submit":
+            findings = parsed.get("findings")
+            if isinstance(findings, list) and "episode_id" in parsed:
+                # flat form {"action": "submit", "episode_id": ..., "findings": [...]}
+                findings = {"episode_id": parsed["episode_id"], "findings": findings}
             observation = self._envelope({"status": "submitted"}, None)
-            return self._terminal(observation, "submit", parsed.get("findings"),
+            return self._terminal(observation, "submit", findings,
                                   self._steps - 1, truncated=False)
         try:
             result = self._sandbox.execute(parsed)

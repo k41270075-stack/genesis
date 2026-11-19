@@ -30,6 +30,8 @@ class ProcessEnv:
                  log_dir: str | None = None, popen_kwargs: dict | None = None):
         if mode not in ("eval", "train"):
             raise ValueError("mode must be 'eval' or 'train'")
+        if time_limit_s is not None and (type(time_limit_s) is not int or time_limit_s <= 0):
+            raise ValueError("time_limit_s must be a positive int or None")
         self.mode = mode
         env = dict(os.environ)
         env["PYTHONPATH"] = os.pathsep.join(
@@ -51,6 +53,8 @@ class ProcessEnv:
         self.hello = self._call("hello")
 
     def _call(self, method: str, params: dict | None = None) -> Any:
+        if getattr(self, "_proc", None) is None:
+            raise EnvProtocolError("CLOSED", "the environment was closed")
         if self._proc.poll() is not None:
             raise EnvProtocolError("ZONE_B_EXITED")
         self._next_id += 1
@@ -87,13 +91,21 @@ class ProcessEnv:
         if isinstance(action, (bytes, bytearray)):
             action = bytes(action).decode("utf-8", "replace")
         if isinstance(action, str):
-            params = {"action_json": action}
+            # the same 256 KB cap as zone B, checked here so the line always fits
+            too_large = len(action) > MAX_INPUT_BYTES or \
+                len(action.encode("utf-8", "surrogatepass")) > MAX_INPUT_BYTES
+            params = {"action_json": "\x00too large" if too_large else action}
         else:
             try:
                 text = dumps_canonical(action)
-                params = {"action": action} if len(text) <= MAX_INPUT_BYTES else \
-                    {"action_json": "\x00too large"}
-            except (TypeError, ValueError):
+                if len(text) <= MAX_INPUT_BYTES:
+                    params = {"action": action}
+                elif isinstance(action, dict) and action.get("action") == "submit":
+                    # an oversized submit is still a submit: invalid structure, -1
+                    params = {"action": {"action": "submit", "findings": "too large"}}
+                else:
+                    params = {"action_json": "\x00too large"}
+            except (TypeError, ValueError, RecursionError):
                 params = {"action_json": "\x00not serializable"}
         r = self._call("step", params)
         return r["observation"], r["reward"], r["terminated"], r["truncated"], r["info"]
@@ -125,6 +137,13 @@ class ProcessEnv:
                     pass
             self._stderr.close()
             self._proc = None
+            # keep the zone B log only when it says something (a crash)
+            try:
+                path = Path(self._stderr.name)
+                if path.stat().st_size == 0:
+                    path.unlink()
+            except OSError:
+                pass
 
     def __enter__(self) -> ProcessEnv:
         return self

@@ -68,6 +68,9 @@ def handle(env: LocalEnv, request: Any) -> tuple[dict[str, Any], bool]:
         except (SeedError, ConfigError, GenerationError, ValueError, OSError) as exc:
             return {"id": rid, "error": {"code": "INVALID_RESET",
                                          "message": str(exc)[:300]}}, True
+        except Exception:
+            return {"id": rid, "error": {"code": "INVALID_RESET",
+                                         "message": "invalid seed, config or options"}}, True
         return {"id": rid, "result": {"observation": obs, "info": info}}, True
     if method == "step":
         if "action_json" in params:
@@ -104,7 +107,10 @@ def serve(mode: str = "eval", time_limit_s: int | None = 60,
         except JsonInputError:
             _write(stdout, {"id": None, "error": {"code": "BAD_REQUEST"}})
             continue
-        response, keep = handle(env, request)
+        try:
+            response, keep = handle(env, request)
+        except Exception:                        # the run must survive any request
+            response, keep = {"id": None, "error": {"code": "INTERNAL"}}, True
         _write(stdout, response)
         if not keep:
             return 0

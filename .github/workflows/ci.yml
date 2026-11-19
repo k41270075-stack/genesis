@@ -2,6 +2,7 @@ name: ci
 
 on:
   push:
+    branches: ["**"]       # tags (e.g. the historical v0.1) are not re-checked
   pull_request:
   workflow_dispatch:
 

@@ -178,12 +178,13 @@ def split_config(config: Any) -> tuple[str, dict[str, Any]]:
         return config, {}
     if not isinstance(config, dict):
         raise ConfigError("config must be null, a preset name or an object")
-    if set(config) <= {"preset", "overrides"}:
+    if "preset" in config or "overrides" in config:
         preset = config.get("preset", "default")
         overrides = config.get("overrides") or {}
         if not isinstance(preset, str) or not isinstance(overrides, dict):
             raise ConfigError("config.preset must be a string and config.overrides an object")
-        return preset, overrides
+        rest = {k: v for k, v in config.items() if k not in ("preset", "overrides")}
+        return preset, {**rest, **overrides}      # {"preset": p, "mix": ...} also works
     return "default", config
 
 
@@ -195,12 +196,22 @@ def resolve_config(config: Any, seed: int) -> dict[str, Any]:
     raw = copy.deepcopy(PRESETS[preset])
     _merge(raw, overrides)
     stream = Stream.root(seed, "config")
-    cfg = _resolve(raw, stream)
+    try:
+        cfg = _resolve(raw, stream)
+    except (TypeError, ValueError, KeyError, AttributeError) as exc:
+        if isinstance(exc, ConfigError):
+            raise
+        raise ConfigError("a config field has the wrong type") from None
     cfg["preset"] = preset
     # Only seed-drawn counts are trimmed; explicit overrides fail loudly instead.
-    _apply_mix(cfg, stream.child("mix"),
-               trim="errors" not in overrides and "interactions" not in overrides)
-    validate(cfg)
+    try:
+        _apply_mix(cfg, stream.child("mix"),
+                   trim="errors" not in overrides and "interactions" not in overrides)
+        validate(cfg)
+    except ConfigError:
+        raise
+    except (TypeError, ValueError, KeyError, AttributeError):
+        raise ConfigError("a config field has the wrong type") from None
     return cfg
 
 

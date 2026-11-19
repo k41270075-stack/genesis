@@ -59,6 +59,42 @@ class ProcessEnvTest(unittest.TestCase):
             self.assertEqual(obs["error"]["code"], "MALFORMED_ACTION")
         with self.assertRaises(ValueError):
             VouchAIEnv(mode="eval", isolation="inproc")
+        for bad in (-1, 1.5, True, "60"):
+            with self.assertRaises(ValueError):
+                VouchAIEnv(time_limit_s=bad)
+
+    def test_hostile_reset_and_step_do_not_kill_the_run(self):
+        from vouchai.server.client import EnvProtocolError
+        with VouchAIEnv(mode="train") as env:
+            env.reset(3, "smoke")
+            for bad in ({"company": 5}, {"size": {"customers": {"range": 5}}}, [1], 7):
+                with self.assertRaises(ValueError):
+                    env.reset(1, bad)
+            env.reset(3, {"preset": "smoke", "mix": "clean"})     # preset next to overrides
+            deep = {"action": "calculator", "expression": "1"}
+            node = deep
+            for _ in range(5000):
+                node["x"] = {}
+                node = node["x"]
+            for action in (deep, "x" * 1_100_000, "ж" * 200_000):
+                obs, *_ = env.step(action)
+                self.assertEqual(obs["error"]["code"], "MALFORMED_ACTION")
+            huge = {"action": "submit", "findings": {"episode_id": "x", "findings": [
+                {"affected_ids": ["a"] * 80_000}]}}
+            _, reward, term, trunc, _ = env.step(huge)
+            self.assertEqual((reward, term, trunc), (-1.0, True, False))
+            self.assertEqual(len(env.finalize()["episodes"]), 2)
+        with self.assertRaises(EnvProtocolError):
+            env.step({"action": "calculator", "expression": "1"})
+
+    def test_flat_submit_form(self):
+        ep = generate_episode(51, "smoke")
+        flat = {"action": "submit", **oracle_findings(ep)}
+        with VouchAIEnv(mode="train") as env:
+            env.reset(51, "smoke")
+            _, reward, term, _, _ = env.step(flat)
+        self.assertTrue(term)
+        self.assertEqual(reward, 1.0)
 
 
 if __name__ == "__main__":
