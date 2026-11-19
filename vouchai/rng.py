@@ -73,6 +73,10 @@ class Stream:
         """A sub-stream that depends only on this stream's identity and the name."""
         return Stream(_derive(self._key, name))
 
+    def digest(self, label: str) -> bytes:
+        """Keyed hash of a label; used for IDs and tie-breaking order."""
+        return hashlib.sha256(self._key + b"\x00digest\x00" + label.encode("utf-8")).digest()
+
     def _refill(self) -> None:
         block = hashlib.sha256(self._key + self._counter.to_bytes(8, "big")).digest()
         self._counter += 1

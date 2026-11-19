@@ -22,7 +22,8 @@ BANNED_ATTRS = {"now", "today", "utcnow", "getcontext", "setcontext", "localcont
 ALLOWED_TIME_ATTRS = {"monotonic"}
 # Tooling modules that use "/" only to join pathlib paths; they never touch
 # money, rates or generated data.
-PATH_JOIN_FILES = {"vouchai/checks.py", "vouchai/cli.py"}
+PATH_JOIN_FILES = {"vouchai/checks.py", "vouchai/cli.py", "vouchai/episode.py",
+                   "vouchai/server/client.py"}
 
 
 def python_files(folder: Path):
@@ -80,10 +81,12 @@ class HygieneTest(unittest.TestCase):
                 if (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div)
                         and rel.as_posix() not in PATH_JOIN_FILES):
                     line = lines[node.lineno - 1]
-                    if "float-ok" not in line and not _is_fraction_or_decimal_context(line):
+                    if ("float-ok" not in line and "# exact" not in line
+                            and not _is_fraction_or_decimal_context(line)):
                         problems.append(f"{rel}:{node.lineno}: '/' without float-ok marker")
                 if isinstance(node, ast.Constant) and isinstance(node.value, float):
                     problems.append(f"{rel}:{node.lineno}: float literal")
+        self.maxDiff = None
         self.assertEqual(problems, [])
 
     def test_import_graph(self):

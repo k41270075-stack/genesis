@@ -18,6 +18,7 @@ ERROR_MESSAGES: dict[str, str] = {
     "LIMIT_OUT_OF_RANGE": "limit must be an integer from 1 to 50.",
     "CALC_ERROR": "Expression rejected: only + - * / ( ) and decimal numbers are allowed.",
     "EPISODE_ENDED": "The episode has ended. Call reset to start a new one.",
+    "RESET_REQUIRED": "No active episode. Call reset first.",
     "INTERNAL_ERROR": "Internal error.",
 }
 
