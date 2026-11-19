@@ -24,3 +24,6 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "I", "UP"]
+# UP038: isinstance(x, (A, B)) is clearer and faster than A | B.
+# B905: zip() over lists of equal length by construction.
+ignore = ["UP038", "B905"]

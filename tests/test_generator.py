@@ -155,8 +155,8 @@ class EpisodeShapeTest(unittest.TestCase):
                        if r["invoice_id"] == inv and r["account"] == "4000"}
             self.assertEqual(len(issuing), 2)
         elif issue["type"] == "duplicate_invoice":
-            a, b = [next(i for i in t["invoices"] if i["invoice_id"] == x)
-                    for x in issue["affected_ids"]]
+            a, b = (next(i for i in t["invoices"] if i["invoice_id"] == x)
+                    for x in issue["affected_ids"])
             for f in ("entity_id", "issued_at", "currency", "total_minor", "line_items"):
                 self.assertEqual(a[f], b[f])
         elif issue["type"] == "period_cutoff":

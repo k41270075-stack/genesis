@@ -58,8 +58,9 @@ class PairedTransformTest(unittest.TestCase):
             ep = generate_episode(seed, "jury_like")
             with tempfile.TemporaryDirectory() as tmp:
                 a = save_episode(ep, Path(tmp) / "a")
+                folder_a = {"episode_dir": str(a)}
                 base = run(make_policy("simple_reconciler"), [(0, None)],
-                           options_for=lambda s, c: {"episode_dir": str(a)})["summary"]
+                           options_for=lambda s, c, o=folder_a: o)["summary"]
                 for hostile in (False, True):
                     with self.subTest(seed=seed, hostile=hostile):
                         b = transform(a, Path(tmp) / f"b{hostile}", seed=seed, hostile=hostile)
@@ -72,8 +73,9 @@ class PairedTransformTest(unittest.TestCase):
                         # the jury's pair: rename + shuffle, the same reward with new IDs
                         c = transform(a, Path(tmp) / f"c{hostile}", seed=seed, hostile=hostile,
                                       reoffset=False)
+                        folder_c = {"episode_dir": str(c)}
                         other = run(make_policy("simple_reconciler"), [(0, None)],
-                                    options_for=lambda s, c_: {"episode_dir": str(c)})["summary"]
+                                    options_for=lambda s, c_, o=folder_c: o)["summary"]
                         self.assertEqual(other["mean_return"], base["mean_return"])
                         self.assertEqual((other["TP"], other["FP"]), (base["TP"], base["FP"]))
 

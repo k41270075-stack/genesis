@@ -44,8 +44,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    # Advisory until the first clean run; the official check never needs ruff.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -60,8 +58,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: build
         run: docker build -t vouchai .
-      - name: base image digest (to pin in the Dockerfile)
-        run: docker image inspect python:3.11-slim --format '{{index .RepoDigests 0}}'
+      - name: base image digest (pinned in the Dockerfile)
+        continue-on-error: true
+        run: |
+          docker pull -q python:3.11-slim > /dev/null
+          docker image inspect python:3.11-slim --format '{{index .RepoDigests 0}}'
       - name: official one-command check, no network, 2 CPU, 4 GB
         run: |
           start=$(date +%s)

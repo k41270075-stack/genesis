@@ -207,7 +207,7 @@ class TerminationTest(unittest.TestCase):
     def test_hundred_steps_truncate_with_empty_answer(self):
         env = LocalEnv(mode="train")
         env.reset(2, "clean")
-        for i in range(99):
+        for _step in range(99):
             _, reward, term, trunc, _ = env.step(act("calculator", expression="1"))
             self.assertEqual((reward, term, trunc), (0.0, False, False))
         obs, reward, term, trunc, info = env.step(act("calculator", expression="1"))
