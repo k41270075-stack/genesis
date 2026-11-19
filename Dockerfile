@@ -14,10 +14,12 @@ ENV PYTHONHASHSEED=0 \
     VOUCHAI_JOBS=2
 
 WORKDIR /app
-COPY pyproject.toml README.md /app/
+COPY pyproject.toml README.md LICENSE NOTICE episodes.jsonl trajectories.jsonl /app/
 COPY vouchai /app/vouchai
 COPY vouchai_verify /app/vouchai_verify
 COPY tests /app/tests
+COPY schemas /app/schemas
+COPY episodes /app/episodes
 
 # Zone B (environment + grader). The isolated official run starts the policy
 # zone as uid 10002; see `vouchai eval --isolated`.

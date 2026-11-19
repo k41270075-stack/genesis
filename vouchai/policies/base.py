@@ -87,7 +87,8 @@ class View:
 def finding(etype: str, affected: list[str], amount: int, currency: str,
             evidence: list[str], why: str) -> dict:
     return {"type": etype, "affected_ids": affected, "claimed_amount_minor": int(amount),
-            "currency": currency, "evidence_ids": list(dict.fromkeys(e for e in evidence if e))[:10],
+            "currency": currency,
+            "evidence_ids": list(dict.fromkeys(e for e in evidence if e))[:10],
             "explanation": why[:1000]}
 
 
