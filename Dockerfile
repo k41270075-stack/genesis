@@ -21,8 +21,8 @@ COPY tests /app/tests
 COPY schemas /app/schemas
 COPY episodes /app/episodes
 
-# Zone B (environment + grader). The isolated official run starts the policy
-# zone as uid 10002; see `vouchai eval --isolated`.
+# Unprivileged user. The environment and grader run in a child process of the
+# caller (VouchAIEnv); separate OS users per zone are listed in docs/LIMITATIONS.md.
 USER 10001:10001
 
 ENTRYPOINT ["python", "-m", "vouchai"]

@@ -233,8 +233,10 @@ def payment_allocation(ctx: Context, s: Stream, variant: str,
     ctx.taken.update({pay.key, inv_key})
     prior = [p for p in ctx.payments_of(inv_key)
              if p.key != pay.key and utc_seconds(p.timestamp) < utc_seconds(pay.timestamp)]
-    slots = [[("payment", pay.key)], [("invoice", inv_key)],
-             [_rows(f"{inv_key}/post0", ("1200", "4000"))]]
+    # any issuing entry of the invoice carries A (X2: it is posted twice, same amount)
+    issuing = [_rows(f"{inv_key}/post{n}", ("1200", "4000"))
+               for n in range(len(ctx.decisions.invoice_postings[inv_key]))]
+    slots = [[("payment", pay.key)], [("invoice", inv_key)], issuing]
     if variant == "missing":
         slots.append([_rows(f"{pay.key}/recv", ("2150",))])
         checks = [{"query": "no_relief_by_payment", "payment": pay.key, "invoice": inv_key}]
