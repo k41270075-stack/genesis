@@ -24,7 +24,8 @@ ALLOWED_TIME_ATTRS = {"monotonic"}
 # money, rates or generated data.
 PATH_JOIN_FILES = {"vouchai/checks.py", "vouchai/cli.py", "vouchai/episode.py",
                    "vouchai/server/client.py", "vouchai_verify/core.py",
-                   "vouchai_verify/__main__.py"}
+                   "vouchai_verify/__main__.py", "vouchai/harness/transform.py",
+                   "vouchai/harness/dataset.py", "vouchai/harness/replay.py"}
 
 
 def python_files(folder: Path):

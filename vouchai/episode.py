@@ -258,17 +258,9 @@ def _str_or_none(text: str) -> str | None:
     return text if text != "" else None
 
 
-def load_episode(episode_dir: str | Path, with_truth: bool = True) -> Episode:
-    """Load a generated or externally transformed episode folder.
-
-    The format of IDs is not checked and row order carries no meaning; the
-    episode_id comes from the manifest.
-    """
-    root = Path(episode_dir)
-    pub = root / "public" if (root / "public").is_dir() else root
-
-    def read_json(name: str) -> Any:
-        return json.loads((pub / name).read_text(encoding="utf-8"))
+def read_tables(folder: str | Path) -> dict[str, list[dict[str, Any]]]:
+    """The four tables of a folder (public/ or private/clean/), typed as served."""
+    pub = Path(folder)
 
     def read_csv(name: str) -> list[dict[str, str]]:
         text = (pub / name).read_text(encoding="utf-8")
@@ -288,15 +280,27 @@ def load_episode(episode_dir: str | Path, with_truth: bool = True) -> Episode:
     fx = [{"id": fx_id(r["date"], r["source_currency"], r["target_currency"]), "date": r["date"],
            "source_currency": r["source_currency"], "target_currency": r["target_currency"],
            "rate": r["rate"]} for r in read_csv("fx.csv")]
-    manifest = read_json("manifest.json")
+    return {"ledger": ledger, "invoices": read_jsonl("invoices.jsonl"),
+            "payments": read_jsonl("payments.jsonl"), "fx": fx}
+
+
+def load_episode(episode_dir: str | Path, with_truth: bool = True) -> Episode:
+    """Load a generated or externally transformed episode folder.
+
+    The format of IDs is not checked and row order carries no meaning; the
+    episode_id comes from the manifest.
+    """
+    root = Path(episode_dir)
+    pub = root / "public" if (root / "public").is_dir() else root
+    manifest = json.loads((pub / "manifest.json").read_text(encoding="utf-8"))
     episode = Episode(episode_id=manifest["episode_id"], manifest=manifest,
-                      policy=read_json("policy.json"),
-                      tables={"ledger": ledger, "invoices": read_jsonl("invoices.jsonl"),
-                              "payments": read_jsonl("payments.jsonl"), "fx": fx})
+                      policy=json.loads((pub / "policy.json").read_text(encoding="utf-8")),
+                      tables=read_tables(pub))
     truth_path = root / "private" / "truth.json"
     if with_truth and truth_path.is_file():
-        truth = json.loads(truth_path.read_text(encoding="utf-8"))
-        episode.issues = truth["issues"]
+        episode.issues = json.loads(truth_path.read_text(encoding="utf-8"))["issues"]
+    if (root / "private" / "clean" / "ledger.csv").is_file():
+        episode.clean_tables = read_tables(root / "private" / "clean")
     if set(episode.tables) != set(TABLES):
         raise ValueError("episode folder must contain ledger, invoices, payments and fx")
     return episode

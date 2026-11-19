@@ -238,9 +238,11 @@ def derive(book: Book, issue: dict, evidence: list[str]) -> int:
                 raise Insufficient("two issuing entries must be cited")
             return Book.amount(own[-1])
         a, b = (docs[x] for x in affected)
-        for f in ("entity_id", "issued_at", "currency", "total_minor", "line_items"):
+        for f in ("entity_id", "currency", "total_minor", "line_items"):
             if a[f] != b[f]:
                 raise Insufficient("the cited copies differ")
+        if parse_instant(a["issued_at"]) != parse_instant(b["issued_at"]):
+            raise Insufficient("the cited copies were issued at different moments")
         issuing = ("1200", "4000")
         own_b = [r for r in rows if r["invoice_id"] == affected[1] and r["account"] in issuing]
         own_a = [r for r in rows if r["invoice_id"] == affected[0] and r["account"] in issuing]

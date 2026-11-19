@@ -1,0 +1,37 @@
+[
+  {
+    "seed": 0,
+    "config": "jury_like",
+    "episode_id": "ep_4NT3CCDJFPODXKHH",
+    "tables_sha256": "33f24e1f5342c0f425b893bfbca7ac5565fb05db1738741d43578e5ef621f75f",
+    "issues": 7
+  },
+  {
+    "seed": 1,
+    "config": "L5",
+    "episode_id": "ep_CLSE4U2YPIB24B44",
+    "tables_sha256": "9f8705ab882a78e2ee43a3d304828b40e5eb3552d88e035f8954db2814908a17",
+    "issues": 12
+  },
+  {
+    "seed": 2,
+    "config": "clean",
+    "episode_id": "ep_YBFASUDARNZVMY6N",
+    "tables_sha256": "61baf57cba8e11ada11e269c85d3b6a95478815aeaba62b9b7f287a4ff674d18",
+    "issues": 0
+  },
+  {
+    "seed": 28112026,
+    "config": "jury_like",
+    "episode_id": "ep_VPD3EKNDCJ2ZYNFX",
+    "tables_sha256": "346b0ae273252cd2f5bc6ebc3b325fef523b03968be001bc371c3650ba77fb5b",
+    "issues": 4
+  },
+  {
+    "seed": 18446744073709551615,
+    "config": "smoke",
+    "episode_id": "ep_OQJPY6NTQPEPKSOI",
+    "tables_sha256": "7807dc50768483ad981a5682df18be6d6c0d3a5326fd2345c0ca44e13c6ab43b",
+    "issues": 2
+  }
+]
