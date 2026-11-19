@@ -4,7 +4,7 @@ RL-среда для дообучения ИИ-аудиторов: вымышл�
 расследования, скрытые финансовые ошибки и награда, которую нельзя заговорить.
 Genesis Hackathon 2026, трек FinTech.
 
-**Talk is cheap. Evidence pays.**
+**Every claim needs a receipt.**
 
 Сейчас в репозитории только план реализации: [PLAN.md](PLAN.md).
 
