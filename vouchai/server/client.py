@@ -27,7 +27,7 @@ class EnvProtocolError(RuntimeError):
 
 class ProcessEnv:
     def __init__(self, mode: str = "eval", time_limit_s: int | None = 60,
-                 log_dir: str | None = None):
+                 log_dir: str | None = None, popen_kwargs: dict | None = None):
         if mode not in ("eval", "train"):
             raise ValueError("mode must be 'eval' or 'train'")
         self.mode = mode
@@ -44,7 +44,9 @@ class ProcessEnv:
         cmd = [sys.executable, "-m", "vouchai", "serve", "--mode", mode,
                "--time-limit", str(time_limit_s or 0)]
         self._proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                      stderr=self._stderr, env=env, cwd=str(PACKAGE_ROOT))
+                                      stderr=self._stderr, env=env, cwd=str(PACKAGE_ROOT),
+                                      **(popen_kwargs or {}))
+        self.pid = self._proc.pid
         self._next_id = 0
         self.hello = self._call("hello")
 

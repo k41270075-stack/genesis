@@ -58,10 +58,11 @@ class PythonPolicy:
 class SubprocessPolicy:
     """Run a policy as a separate program (any language) over JSON lines."""
 
-    def __init__(self, cmd: list[str] | str, name: str = "subprocess_policy"):
+    def __init__(self, cmd: list[str] | str, name: str = "subprocess_policy",
+                 **popen_kwargs: Any):
         self.name = name
         self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                     shell=isinstance(cmd, str))
+                                     shell=isinstance(cmd, str), **popen_kwargs)
         self._pending: dict | None = None
 
     def _send(self, message: dict) -> None:

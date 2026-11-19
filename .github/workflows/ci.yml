@@ -69,3 +69,6 @@ jobs:
           docker run --rm --network none --read-only --tmpfs /tmp \
             --cpus 2 --memory 4g vouchai check
           echo "wall time: $(( $(date +%s) - start )) s"
+      - name: isolated official run, zone B and policy as different OS users, spy
+        run: |
+          docker run --rm --network none --read-only --tmpfs /tmp --user 0 vouchai             eval --isolated --policy simple_reconciler --config jury_like --seeds 0:5 --spy
