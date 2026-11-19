@@ -105,7 +105,7 @@ def legit_posting(world: World, stream: Stream, event: datetime) -> datetime:
     """Posting moment in the same zone as the event (I9); sometimes a little
     before the document time (D23)."""
     lo, hi = zone_of(world, event)
-    if stream.chance(Fraction(1, 20)):
+    if stream.chance(Fraction(1, 8)):
         early = stream.randint(60, 7_200)
         if utc_seconds(event) - early > utc_seconds(lo) + MIN_GAP_S + 61:
             return event - timedelta(seconds=early)

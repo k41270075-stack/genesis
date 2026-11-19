@@ -99,6 +99,11 @@ class HygieneTest(unittest.TestCase):
             if rel.startswith("vouchai/env/"):
                 bad = {m for m in mods if m.startswith(("vouchai.grader", "vouchai.harness"))}
                 problems += [f"{rel}: env imports {m}" for m in sorted(bad)]
+            if rel.startswith("vouchai/policies/"):
+                bad = {m for m in mods if m.startswith(("vouchai.grader", "vouchai.episode",
+                                                        "vouchai.inject", "vouchai.render",
+                                                        "vouchai.books", "vouchai.server"))}
+                problems += [f"{rel}: policy imports {m}" for m in sorted(bad)]
             bad = {m for m in mods if m.split(".")[0] in ("extras", "vouchai_verify")}
             problems += [f"{rel}: core imports {m}" for m in sorted(bad)]
         for path in python_files(VERIFY):
