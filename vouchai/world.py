@@ -94,7 +94,17 @@ def build_world(cfg: dict[str, Any], stream: Stream) -> World:
         currency = s_cust.choice(foreign) if foreign and s_cust.chance(share) else base
         customers.append(Customer(key=f"cus{i:03d}", name=name, currency=currency,
                                   subscription=s_cust.chance(Fraction(2, 5))))
-    used = sorted({c.currency for c in customers} - {base})
+    # With foreign currencies configured, at least two customers use one of them.
+    if foreign and share > 0 and len(customers) >= 3:
+        for i in range(len(customers)):
+            if sum(1 for c in customers if c.currency != base) >= 2:
+                break
+            c = customers[i]
+            if c.currency == base:
+                customers[i] = Customer(key=c.key, name=c.name, currency=s_cust.choice(foreign),
+                                        subscription=c.subscription)
+    # The grid covers every configured currency, used or not (full grid, no "on demand").
+    used = sorted(({c.currency for c in customers} | set(foreign)) - {base})
     fx_start = window_start.date() - timedelta(days=FX_HISTORY_DAYS)
     fx_end = window_end.date()
     fx = build_fx(stream.child("fx"), base, used, fx_start, fx_end)

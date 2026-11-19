@@ -32,7 +32,9 @@ ERROR_VARIANTS = {
     "period_cutoff": ("right_early", "right_late", "left_early", "left_late"),
 }
 # Types whose plugins exist in this generator version.
-IMPLEMENTED_TYPES = ("duplicate_invoice", "period_cutoff")
+IMPLEMENTED_TYPES = ERROR_TYPES
+INTERACTIONS = ("partial_fx_boundary", "duplicate_with_partial")
+MIXES = ("regular", "clean", "interaction")
 MAX_ERRORS = 12
 OFFSETS = ("+05:00", "+06:00", "+03:00", "+00:00", "-05:00", "+09:00", "-03:00", "+05:30")
 MONTHS_2027 = tuple(f"2027-{m:02d}-01" for m in range(1, 13))
@@ -68,8 +70,8 @@ _BASE: dict[str, Any] = {
         "fx_rate_date": {"choice": ["same_day_or_previous", "previous_day_or_earlier"]},
         "rounding": {"choice": ["half_even", "half_up"]},
     },
-    "errors": _errors({"duplicate_invoice": {"range": [0, 2]},
-                       "period_cutoff": {"range": [0, 2]}}),
+    "mix": "regular",
+    "errors": _errors({t: {"range": [0, 2]} for t in ERROR_TYPES}),
     "interactions": {"partial_fx_boundary": 0, "duplicate_with_partial": 0},
     "distractors": {"density": "0.3", "phantom_targets": True},
     "render": {"id_seed": 0, "order_seed": 0},
@@ -92,19 +94,26 @@ PRESETS: dict[str, dict[str, Any]] = {
     "smoke": _preset(size__customers=4, size__invoices=20, size__target_ledger_rows=200,
                      errors=_errors({"duplicate_invoice": 1, "period_cutoff": 1})),
     "clean": _preset(errors=_errors({})),
-    "train": _preset(),
-    "dev": _preset(),
-    "jury_like": _preset(errors=_errors({"duplicate_invoice": {"range": [0, 3]},
-                                         "period_cutoff": {"range": [0, 3]}})),
+    "train": _preset(mix={"choice": ["regular", "regular", "clean", "interaction"]}),
+    "dev": _preset(mix={"choice": ["regular", "regular", "clean", "interaction"]}),
+    # 25 % clean companies, 25 % with an interaction scenario, like the jury's sample.
+    "jury_like": _preset(mix={"choice": ["regular", "regular", "clean", "interaction"]},
+                         errors=_errors({t: {"range": [0, 3]} for t in ERROR_TYPES})),
     "L1": _preset(errors=_errors({"duplicate_invoice": 1})),
-    "L2": _preset(errors=_errors({"period_cutoff": 1})),
-    "L3": _preset(errors=_errors({"duplicate_invoice": 1, "period_cutoff": 1})),
+    "L2": _preset(errors=_errors({"duplicate_invoice": 1, "period_cutoff": 1})),
+    "L3": _preset(errors=_errors({t: 1 for t in ERROR_TYPES})),
     "L4": _preset(size__invoices={"range": [60, 120]},
                   size__target_ledger_rows={"range": [500, 1200]},
-                  errors=_errors({"duplicate_invoice": 2, "period_cutoff": 2})),
+                  mix="interaction",
+                  errors=_errors({t: 2 for t in ERROR_TYPES})),
     "L5": _preset(size__invoices={"range": [120, 180]},
                   size__target_ledger_rows={"range": [1200, 2000]},
-                  errors=_errors({"duplicate_invoice": 3, "period_cutoff": 3})),
+                  interactions={"partial_fx_boundary": 1, "duplicate_with_partial": 1},
+                  errors=_errors({t: 2 for t in ERROR_TYPES})),
+    "corners_small": _preset(size__customers=3, size__invoices=40, size__target_ledger_rows=200,
+                             errors=_errors({t: 3 for t in ERROR_TYPES})),
+    "corners_large": _preset(size__invoices=200, size__target_ledger_rows=2000,
+                             errors=_errors({})),
 }
 
 BOUNDS = {
@@ -185,10 +194,40 @@ def resolve_config(config: Any, seed: int) -> dict[str, Any]:
         raise ConfigError(f"unknown preset {preset!r}; known: {', '.join(sorted(PRESETS))}")
     raw = copy.deepcopy(PRESETS[preset])
     _merge(raw, overrides)
-    cfg = _resolve(raw, Stream.root(seed, "config"))
+    stream = Stream.root(seed, "config")
+    cfg = _resolve(raw, stream)
     cfg["preset"] = preset
+    # Only seed-drawn counts are trimmed; explicit overrides fail loudly instead.
+    _apply_mix(cfg, stream.child("mix"),
+               trim="errors" not in overrides and "interactions" not in overrides)
     validate(cfg)
     return cfg
+
+
+def _apply_mix(cfg: dict[str, Any], stream: Stream, trim: bool) -> None:
+    mix = cfg.get("mix", "regular")
+    if mix not in MIXES:
+        raise ConfigError(f"mix must be one of {list(MIXES)}")
+    if mix == "clean":
+        for etype in ERROR_TYPES:
+            cfg["errors"][etype]["count"] = 0
+        cfg["interactions"] = {name: 0 for name in INTERACTIONS}
+    elif mix == "interaction" and not any(cfg["interactions"].values()):
+        # X1 needs a non-zero company offset (local and UTC dates must differ).
+        options = (list(INTERACTIONS) if cfg["company"]["timezone"] != "+00:00"
+                   else ["duplicate_with_partial"])
+        cfg["interactions"][stream.choice(options)] = 1
+    # Seed-drawn counts never exceed the episode limit: trim the largest first.
+    if trim and mix != "clean" and all(type(v) is int for v in cfg["interactions"].values()):
+        def total() -> int:
+            return (sum(cfg["errors"][t]["count"] for t in ERROR_TYPES
+                        if type(cfg["errors"][t]["count"]) is int)
+                    + 2 * sum(cfg["interactions"].values()))
+        while total() > MAX_ERRORS:
+            largest = max(ERROR_TYPES, key=lambda t: (cfg["errors"][t]["count"], t))
+            if cfg["errors"][largest]["count"] == 0:
+                break
+            cfg["errors"][largest]["count"] -= 1
 
 
 def validate(cfg: dict[str, Any]) -> None:
@@ -243,11 +282,12 @@ def validate(cfg: dict[str, Any]) -> None:
         if count and etype not in IMPLEMENTED_TYPES:
             raise ConfigError(f"errors.{etype}: not implemented in this generator version")
         total += count
-    if total > MAX_ERRORS:
-        raise ConfigError(f"at most {MAX_ERRORS} errors per episode")
+    if set(cfg["interactions"]) != set(INTERACTIONS):
+        raise ConfigError(f"interactions must have exactly {list(INTERACTIONS)}")
     for name, value in cfg["interactions"].items():
-        if _int(value, f"interactions.{name}", 0, MAX_ERRORS):
-            raise ConfigError(f"interactions.{name}: not implemented in this generator version")
+        total += 2 * _int(value, f"interactions.{name}", 0, MAX_ERRORS // 2)
+    if total > MAX_ERRORS:
+        raise ConfigError(f"at most {MAX_ERRORS} errors per episode (an interaction counts 2)")
 
     density = _fraction(cfg["distractors"]["density"], "distractors.density")
     if not 0 <= density <= Fraction(6, 10):

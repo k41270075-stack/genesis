@@ -38,7 +38,13 @@ class Invoice:
     due_at: datetime             # company offset
     lines: list[LineItem]
     total: int
-    copy_of: str | None = None   # provenance of an injected duplicate document
+    copy_of: str | None = None   # provenance only: an injected or legitimate copy
+    credit_for: str | None = None    # credit note: key of the cancelled invoice (full)
+    replaces: str | None = None      # re-issued invoice: key of the cancelled one
+
+    @property
+    def is_credit_note(self) -> bool:
+        return self.credit_for is not None
 
 
 @dataclass
@@ -47,9 +53,12 @@ class Payment:
     customer: str
     currency: str
     timestamp: datetime          # bank offset
-    amount: int                  # gross, what the customer sent
+    amount: int                  # gross, what the customer sent; negative = refund
     fee: int                     # bank fee withheld from amount, doc currency
     allocations: list[tuple[str, int]]   # (invoice key, amount in payment currency)
+    mode: str = "direct"         # direct | two_step (via 2150, D17)
+    public_refs: bool = True     # False: allocated without a reference (D13)
+    excess_account: str = "2150"  # where an unallocated amount goes: 2150 or 2200
 
 
 @dataclass
@@ -66,6 +75,14 @@ class Decisions:
 
     invoice_postings: dict[str, list[datetime]] = field(default_factory=dict)
     payment_posting: dict[str, datetime] = field(default_factory=dict)
+    # two-step receipts: moment of the reclassification 2150 -> 1200
+    reclass_posting: dict[str, datetime] = field(default_factory=dict)
+    # storno and re-posting (D14): (wrong posting, mirror reversal) before the right one
+    invoice_storno: dict[str, tuple[datetime, datetime]] = field(default_factory=dict)
+    # amounts actually applied to invoices (E2 lowers them); default = allocations
+    applied: dict[str, list[tuple[str, int]]] = field(default_factory=dict)
+    # FX errors (E3): the rate actually used, as (rate date, source currency)
+    rate_override: dict[str, tuple[date, str]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -83,7 +100,7 @@ class Row:
 class Entry:
     key: str
     timestamp: datetime          # company offset; unique per entry
-    kind: str                    # invoice | receipt | expense
+    kind: str                    # invoice | storno | credit | receipt | reclass | refund | expense
     doc: str | None              # invoice or payment key
     rows: tuple[Row, ...]
 

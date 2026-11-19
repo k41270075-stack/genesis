@@ -138,9 +138,11 @@ class EpisodeShapeTest(unittest.TestCase):
             self.assertLessEqual(len(issue["evidence_sets"]), 64)
             self.assertGreaterEqual(issue["expected_amount_minor"],
                                     10 ** m["currency_exponents"][m["base_currency"]])
-            carriers = [r for r in t["ledger"] if r["row_id"] in issue["carrier_row_ids"]]
-            self.assertEqual(sum(r["debit_minor"] for r in carriers),
-                             issue["expected_amount_minor"])
+            if issue["type"] in ("duplicate_invoice", "period_cutoff"):
+                carriers = [r for r in t["ledger"] if r["row_id"] in issue["carrier_row_ids"]]
+                self.assertEqual(sum(r["debit_minor"] for r in carriers),
+                                 issue["expected_amount_minor"])
+            self.assertTrue(issue["carrier_row_ids"])
             self._check_manifestation(ep, issue, start, end)
         self.assertEqual(len(keys), len(ep.issues))
         self.assertEqual(oracle_reward(ep)["reward"], 1.0)
@@ -170,6 +172,43 @@ class EpisodeShapeTest(unittest.TestCase):
                 return -1 if x < start else (0 if x < end else 1)
 
             self.assertNotEqual(zone(event), zone(posted))
+
+    def test_all_types_and_interactions_occur(self):
+        types, groups = set(), set()
+        for seed in range(16):
+            ep = episode(seed, "L5")
+            types.update(i["type"] for i in ep.issues)
+            groups.update(i["interaction_group"] for i in ep.issues if i["interaction_group"])
+            self.assertEqual(ep.provenance["unplaced_errors"], [])
+        self.assertEqual(types, {"duplicate_invoice", "payment_allocation", "fx_conversion",
+                                 "period_cutoff"})
+        self.assertEqual(groups, {"X1", "X2"})
+
+    def test_interaction_x1_shape(self):
+        for seed in range(16):
+            ep = episode(seed, "L5")
+            x1 = [i for i in ep.issues if i["interaction_group"] == "X1"]
+            if not x1:
+                continue
+            fx, alloc = x1
+            self.assertEqual((fx["type"], alloc["type"]), ("fx_conversion", "payment_allocation"))
+            pay_id = fx["affected_ids"][0]
+            self.assertEqual(alloc["affected_ids"][0], pay_id)
+            pay = next(p for p in ep.tables["payments"] if p["payment_id"] == pay_id)
+            stamp = parse_ts(pay["timestamp"])
+            start, end = (parse_ts(ep.manifest["period_start"]),
+                          parse_ts(ep.manifest["period_end"]))
+            self.assertTrue(start <= stamp < end)          # in the period by company time
+            utc_day = stamp.astimezone(parse_ts("2000-01-01T00:00:00+00:00").tzinfo).date()
+            local_day = stamp.astimezone(start.tzinfo).date()
+            self.assertNotEqual(utc_day, local_day)        # but another day (period) in UTC
+
+    def test_doubles_present_in_clean_books(self):
+        totals = Counter()
+        for seed in range(16):
+            totals.update(episode(seed, "clean").provenance["doubles"])
+        for name in ("D2_split_payments", "D5_fees", "D17_two_step", "D19_multi_invoice"):
+            self.assertGreater(totals[name], 0, name)
 
     def test_clean_preset_has_no_issues(self):
         for seed in range(6):
@@ -212,7 +251,8 @@ class DiskTest(unittest.TestCase):
 class ConfigTest(unittest.TestCase):
     def test_rejects(self):
         for config in ("nope", {"preset": "nope"}, {"size": {"customers": 1}},
-                       {"bogus": 1}, {"errors": {"fx_conversion": {"count": 1}}},
+                       {"bogus": 1}, {"interactions": {"partial_fx_boundary": 7}},
+                       {"interactions": {"x3": 1}}, {"mix": "chaos"},
                        {"errors": {"period_cutoff": {"count": 13}}}, 5, ["x"],
                        {"company": {"timezone": "+25:00"}}):
             with self.assertRaises(ConfigError, msg=repr(config)):

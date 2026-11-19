@@ -6,10 +6,17 @@ Genesis Hackathon 2026, трек FinTech.
 
 **Every claim needs a receipt.**
 
-Статус: фаза 1 — генератор (мир, события, движок проводок, ошибки
-`duplicate_invoice` и `period_cutoff`), среда с пятью инструментами и общий
-оценщик. Остальные два типа ошибок, сценарии взаимодействия, двойники и
-независимый проверяльщик — следующие фазы. План: [PLAN.md](PLAN.md).
+Статус: фаза 2 — генератор с четырьмя типами ошибок (`duplicate_invoice`,
+`payment_allocation`, `fx_conversion`, `period_cutoff`), двумя сценариями
+взаимодействия (X1, X2) и законными двойниками; среда с пятью инструментами;
+общий оценщик; независимый проверяльщик `vouchai_verify`. План: [PLAN.md](PLAN.md).
+
+Независимая проверка эпизода (отчёт A/B/C и паспорт):
+
+```
+python -m vouchai generate --seed 7 --config jury_like --out ep7
+python -m vouchai_verify ep7 --report --passport
+```
 
 Подключение (Python 3.10+, только стандартная библиотека; из корня репозитория
 или с `PYTHONPATH=<путь к репозиторию>`):

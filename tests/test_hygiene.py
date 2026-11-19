@@ -23,7 +23,8 @@ ALLOWED_TIME_ATTRS = {"monotonic"}
 # Tooling modules that use "/" only to join pathlib paths; they never touch
 # money, rates or generated data.
 PATH_JOIN_FILES = {"vouchai/checks.py", "vouchai/cli.py", "vouchai/episode.py",
-                   "vouchai/server/client.py"}
+                   "vouchai/server/client.py", "vouchai_verify/core.py",
+                   "vouchai_verify/__main__.py"}
 
 
 def python_files(folder: Path):
