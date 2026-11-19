@@ -59,7 +59,7 @@ class RateTest(unittest.TestCase):
 
 
 class ConversionTest(unittest.TestCase):
-    """Numbers of the X1 worked example (PLAN section 6.8)."""
+    """Numbers of the X1 worked example (docs/DESIGN.md)."""
 
     def test_x1_booked_invoice(self):
         self.assertEqual(conv(845_000, parse_rate("541.2346"), "EUR", "KZT", "half_even"),

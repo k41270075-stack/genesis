@@ -1,4 +1,4 @@
-"""Static rules of the core (PLAN sections 2 and 10).
+"""Static rules of the core (docs/DESIGN.md).
 
 - banned modules and calls that break byte-level determinism;
 - no float() anywhere in the core; true division of ints only where marked;

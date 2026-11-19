@@ -1,4 +1,4 @@
-"""The three reports the jury reads (PLAN 5.4):
+"""The three reports the jury reads (docs/ACCOUNTING.md):
 
   A  the clean books satisfy every accounting equality and show no discrepancy;
   B  the public books break exactly the declared equalities, by exactly the

@@ -5,7 +5,7 @@ base currency. Errors never edit rows: they change a decision and the engine
 re-posts, so every consequence stays consistent and each error has exactly one
 carrier row (or one carrier equation).
 
-Rules (PLAN 5.3):
+Rules (docs/ACCOUNTING.md):
   invoice T        Dr 1200 A / Cr 4000 A,  A = conv(T, policy rate of the issue date)
   storno (D14)     wrong posting, mirror reversal, right posting - all in one period
   credit note      Dr 4100 / Cr 1200 of the remaining booked amount (full cancellation)
