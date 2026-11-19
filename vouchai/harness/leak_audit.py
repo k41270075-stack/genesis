@@ -27,6 +27,9 @@ FEATURES = {
     "amount_last_digit": lambda d, ts, amount, pos: amount % 10,
     "position_in_table": lambda d, ts, amount, pos: pos,
     "notes_text": lambda d, ts, amount, pos: len(d["_notes"]),
+    # look-alikes around the object: a cluster of doubles must not mark an error
+    # (what "phantom targets" guard against)
+    "lookalikes_nearby": lambda d, ts, amount, pos: d["_neighbours"],
 }
 
 
@@ -61,7 +64,11 @@ def _eligible(ep, etype: str, kind: str):
         return start <= parse_ts(ts) < end
 
     if etype == "period_cutoff":
-        return lambda d: True
+        # a cut-off error needs an event within 3 days of a period edge
+        def near_edge(d):
+            ts = parse_ts(d["issued_at"] if kind == "invoice" else d["timestamp"])
+            return min(abs((ts - e).total_seconds()) for e in (start, end)) <= 3 * 86_400
+        return near_edge
     if kind == "invoice":
         if etype == "duplicate_invoice":
             return lambda d: in_period(d["issued_at"]) and not d.get("credit_for")
@@ -88,6 +95,8 @@ def collect(seeds: range, config: str = "jury_like") -> dict[str, dict[str, list
                 ("invoice", "invoices", "invoice_id", "issued_at", "total_minor"),
                 ("payment", "payments", "payment_id", "timestamp", "amount_minor")):
             rows = ep.tables[table]
+            stamps = [parse_ts(r[time_field]) for r in rows]
+            key = "entity_id" if kind == "invoice" else "currency"
             for etype, ids in targets.items():
                 if not any(r[id_field] in ids for r in rows):
                     continue
@@ -96,8 +105,13 @@ def collect(seeds: range, config: str = "jury_like") -> dict[str, dict[str, list
                     label = d[id_field] in ids
                     if not label and not eligible(d):
                         continue
-                    d = dict(d, _notes=notes(kind, d))
-                    ts = parse_ts(d[time_field])
+                    ts = stamps[pos]
+                    # a look-alike, not the duplicate itself: an identical copy IS the
+                    # error of a duplicate document, so it is not counted
+                    near = sum(1 for k, r in enumerate(rows) if k != pos and r[key] == d[key]
+                               and abs((stamps[k] - ts).total_seconds()) <= 3 * 86_400
+                               and r.get("line_items") != d.get("line_items", 0))
+                    d = dict(d, _notes=notes(kind, d), _neighbours=near)
                     position = Fraction(pos, max(1, len(rows) - 1))
                     for name, fn in FEATURES.items():
                         value = fn(d, ts, abs(d[amount_field]), position)

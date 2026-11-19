@@ -204,7 +204,7 @@ def make_invoices(world: World, stream: Stream, count: int) -> list[Invoice]:
     while len(book.invoices) < count:
         customer = s.choice(world.customers)
         issued = _random_moment(world, s, lo, hi, world.offset, business_hours=True)
-        kind = s.weighted(["plain", "batch", "same_amount", "same_customer"], [80, 8, 6, 6])
+        kind = s.weighted(["plain", "batch", "same_amount", "same_customer"], [64, 8, 8, 20])
         if kind == "batch":                    # D24: several invoices in one second
             for other in s.sample(world.customers, min(len(world.customers), s.randint(2, 4))):
                 book.add(other, issued, book.random_items(other, s),
@@ -263,7 +263,7 @@ def _trap_moments(world: World, stream: Stream) -> list[datetime]:
         return []
     base = world.period_start if off > 0 else world.period_end
     return [in_offset(base + timedelta(seconds=stream.randint(lo, hi) - utc_seconds(base)),
-                      world.bank_offset) for _ in range(2)]
+                      world.bank_offset) for _ in range(4)]
 
 
 def make_payments(world: World, stream: Stream, invoices: list[Invoice]) -> list[Payment]:

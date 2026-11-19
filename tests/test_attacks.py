@@ -54,8 +54,9 @@ class LeakAuditTest(unittest.TestCase):
         from fractions import Fraction
 
         from vouchai.harness.leak_audit import audit
-        seeds = range(7000, 7120) if FULL else range(7000, 7040)
-        bound = Fraction(1, 10) if FULL else Fraction(1, 5)   # small samples are noisier
+        # fixed seeds, so the result is deterministic; 120 episodes keep the noise low
+        seeds = range(7000, 7240) if FULL else range(7000, 7120)
+        bound = Fraction(1, 10)
         flagged = [r for r in audit(seeds) if r["positives"] >= 20
                    and abs(r["auc"] - Fraction(1, 2)) > bound]
         self.assertEqual(flagged, [])
