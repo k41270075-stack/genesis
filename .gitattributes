@@ -1,6 +1,15 @@
 # Одинаковые байты на Windows и Linux: от этого зависят контрольные суммы эпизодов.
 * text=auto eol=lf
+
+# Данные эпизодов и траектории git не трогает вообще — ни переводы строк, ни кодировку.
+episodes/** -text
+trajectories.jsonl -text
+episodes.jsonl -text
+*.csv -text
+*.jsonl -text
+
 *.png binary
 *.jpg binary
+*.svg -text
 *.pdf binary
-*.whl binary
+*.tar binary
