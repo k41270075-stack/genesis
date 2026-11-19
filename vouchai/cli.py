@@ -119,6 +119,9 @@ def main(argv: list[str] | None = None) -> int:
         (out / "FAILURE_ANALYSIS.md").write_text(failure_analysis_md(), encoding="utf-8",
                                                 newline="\n")
         (out / "LEAK_AUDIT.md").write_text(leak_audit_md(), encoding="utf-8", newline="\n")
+        from .harness.reports import life_of_an_error_svg
+        (REPO_ROOT / "docs" / "life_of_an_error.svg").write_text(
+            life_of_an_error_svg(), encoding="utf-8", newline="\n")
         print(out / "FAILURE_ANALYSIS.md")
         print(out / "LEAK_AUDIT.md")
         return 0
