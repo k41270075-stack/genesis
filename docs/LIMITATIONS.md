@@ -43,5 +43,6 @@
 преобразованные данные, организаторы уточнят; среда принимает и папку эпизода
 (`options.episode_dir`), и `render.id_seed` / `render.order_seed` в конфиге.
 
-**Docker.** Базовый образ `python:3.11-slim` пока закреплён тегом, а не digest.
-У команды локально нет Docker: образ собирается и проверяется в CI.
+**Docker.** Базовый образ `python:3.11-slim` закреплён по multi-arch digest.
+У команды локально нет Docker: образ собирается и проверяется в CI
+(`docker run --network none --read-only --cpus 2 --memory 4g … check`, около 2 минут).

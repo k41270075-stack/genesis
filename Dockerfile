@@ -3,15 +3,14 @@
 # No dependencies: the core and the check use the Python standard library only,
 # so the image has no RUN steps and builds without network access.
 # Build platform: linux/amd64 and linux/arm64 (multi-arch base image).
-# TODO(phase 5): pin the base image by its multi-arch index digest; CI prints it.
-FROM python:3.11-slim
+# Pinned by its multi-arch index digest (CI prints the current one).
+FROM python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535
 
 ENV PYTHONHASHSEED=0 \
     PYTHONUTF8=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
-    HOME=/tmp \
-    VOUCHAI_JOBS=2
+    HOME=/tmp
 
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE episodes.jsonl trajectories.jsonl /app/
@@ -19,6 +18,8 @@ COPY vouchai /app/vouchai
 COPY vouchai_verify /app/vouchai_verify
 COPY tests /app/tests
 COPY schemas /app/schemas
+COPY docs /app/docs
+COPY reports /app/reports
 COPY episodes /app/episodes
 
 # Unprivileged user. The environment and grader run in a child process of the
