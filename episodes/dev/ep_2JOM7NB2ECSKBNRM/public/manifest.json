@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "generator_version": "0.1.0",
+  "env_version": "1.0.0",
+  "generator_version": "1.0.0",
   "episode_id": "ep_2JOM7NB2ECSKBNRM",
   "company": "Enmi Foods",
   "base_currency": "EUR",

@@ -2,7 +2,7 @@
 
 What: P/R/F1 (micro over episodes), mean shared reward and steps of our baseline policies on the 10 dev episodes, train mode.
 Command: `python -m vouchai build-dataset`.
-Versions: env 0.1.0, generator 0.1.0, reward shared-v1.
+Versions: env 1.0.0, generator 1.0.0, reward shared-v1.
 
 | Policy | TP | FP | FN | micro F1 | mean F1 | mean return | mean steps |
 |---|---|---|---|---|---|---|---|

@@ -5,7 +5,7 @@ the truth from the cited evidence records only, checks the accounting
 invariants on the clean books and the declared discrepancies on the public
 books, and writes the episode passport ("Given / Find / Solution / Answer").
 
-Status: skeleton (phase 0). The checks land in phase 2 of the plan.
+    python -m vouchai_verify EPISODE_DIR --report --passport
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"

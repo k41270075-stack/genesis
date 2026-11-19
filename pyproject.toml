@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vouchai"
-version = "0.1.0"
+version = "1.0.0"
 description = "RL environment for training AI financial auditors: synthetic companies, investigation tools, hidden accounting errors and an evidence-based reward."
 readme = "README.md"
 license = { text = "Apache-2.0" }

@@ -13,7 +13,7 @@ ENV PYTHONHASHSEED=0 \
     HOME=/tmp
 
 WORKDIR /app
-COPY pyproject.toml README.md LICENSE NOTICE episodes.jsonl trajectories.jsonl /app/
+COPY pyproject.toml README.md LICENSE NOTICE CHANGELOG.md Dockerfile episodes.jsonl trajectories.jsonl /app/
 COPY vouchai /app/vouchai
 COPY vouchai_verify /app/vouchai_verify
 COPY tests /app/tests
