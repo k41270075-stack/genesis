@@ -20,12 +20,16 @@ BANNED_ATTRS = {"now", "today", "utcnow", "getcontext", "setcontext", "localcont
                 "utcfromtimestamp", "fromtimestamp", "localtime", "time_ns"}
 # time.monotonic is allowed only for timeouts and report timing.
 ALLOWED_TIME_ATTRS = {"monotonic"}
+# The scorecard is a test suite in module form: it compares rewards with float
+# literals (0.0, 1.0, -1.0) and feeds a float amount on purpose (an attack).
+FLOAT_LITERAL_OK = {"vouchai/harness/scorecard.py"}
 # Tooling modules that use "/" only to join pathlib paths; they never touch
 # money, rates or generated data.
 PATH_JOIN_FILES = {"vouchai/checks.py", "vouchai/cli.py", "vouchai/episode.py",
                    "vouchai/server/client.py", "vouchai_verify/core.py",
                    "vouchai_verify/__main__.py", "vouchai/harness/transform.py",
-                   "vouchai/harness/dataset.py", "vouchai/harness/replay.py"}
+                   "vouchai/harness/dataset.py", "vouchai/harness/replay.py",
+                   "vouchai/harness/scorecard.py"}
 
 
 def python_files(folder: Path):
@@ -86,7 +90,8 @@ class HygieneTest(unittest.TestCase):
                     if ("float-ok" not in line and "# exact" not in line
                             and not _is_fraction_or_decimal_context(line)):
                         problems.append(f"{rel}:{node.lineno}: '/' without float-ok marker")
-                if isinstance(node, ast.Constant) and isinstance(node.value, float):
+                if (isinstance(node, ast.Constant) and isinstance(node.value, float)
+                        and rel.as_posix() not in FLOAT_LITERAL_OK):
                     problems.append(f"{rel}:{node.lineno}: float literal")
         self.maxDiff = None
         self.assertEqual(problems, [])

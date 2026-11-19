@@ -53,7 +53,8 @@ def _traits(ep, finding: dict) -> list[str]:
             if len(p["allocations"]) > 1:
                 out.append("multi_invoice")
             for a in p["allocations"]:
-                if a["invoice_id"] in inv and a["amount_minor"] < inv[a["invoice_id"]]["total_minor"]:
+                total = inv[a["invoice_id"]]["total_minor"] if a["invoice_id"] in inv else 0
+                if a["amount_minor"] < total:
                     out.append("partial")
             if rows and p["timestamp"][:10] != rows[0]["timestamp"][:10]:
                 out.append("edge_moment")      # bank date differs from the booking date

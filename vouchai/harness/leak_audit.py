@@ -69,7 +69,8 @@ def _eligible(ep, etype: str, kind: str):
             return lambda d: in_period(d["issued_at"]) and d["currency"] != base
         return lambda d: d["invoice_id"] in paid_in_period
     if etype == "fx_conversion":
-        return lambda d: in_period(d["timestamp"]) and d["currency"] != base             and d["amount_minor"] > 0 and not d["fee_minor"]
+        return lambda d: (in_period(d["timestamp"]) and d["currency"] != base
+                          and d["amount_minor"] > 0 and not d["fee_minor"])
     return lambda d: in_period(d["timestamp"]) and bool(d["allocations"])
 
 
