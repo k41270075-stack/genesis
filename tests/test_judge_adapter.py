@@ -142,6 +142,41 @@ class AdapterTest(unittest.TestCase):
         self.assertEqual((reward, term), (-1.0, True))
         self.assertFalse(info["grade"]["valid"])
 
+    def test_jury_made_fixture_loads_through_episode_dir(self):
+        # organizers, 21.11: test 12 uses one jury fixture for all teams (manifest,
+        # ledger, invoices, payments, fx, policy + closed truth), loaded via episode_dir
+        from vouchai.episode import read_tables
+        src = Path(__file__).resolve().parent.parent / "examples" / "matcher_fixture"
+        tables = read_tables(src / "public")
+        d = self.tmp / "jury_fixture"
+        d.mkdir()
+        (d / "manifest.json").write_text(json.dumps({"episode_id": "jury_fx_12",
+                                                     "base_currency": "KZT"}), "utf-8")
+        (d / "policy.json").write_text("{}", "utf-8")
+        (d / "ledger.json").write_text(json.dumps(tables["ledger"]), "utf-8")
+        (d / "invoices.json").write_text(json.dumps(tables["invoices"]), "utf-8")
+        (d / "payments.json").write_text("[]", "utf-8")
+        (d / "fx.json").write_text("[]", "utf-8")
+        (d / "truth.json").write_text(json.dumps([{                # no issue_id, a bare list
+            "type": "duplicate_invoice", "affected_ids": ["R1"], "expected_amount_minor": 10000,
+            "currency": "KZT", "evidence_ids": ["D1", "D2"]}]), "utf-8")
+        obs, _ = self.env.reset(0, {"mode": "closed", "episode_dir": str(d), "team_config": {}})
+        self.assertEqual(obs["manifest"]["episode_id"], "jury_fx_12")
+        o, *_ = self.step("list_records", table="ledger", cursor=None, limit=50)
+        self.assertEqual(len(o["result"]["records"]), 5)
+        o, *_ = self.step("get_record", table="ledger", id="R1")
+        self.assertEqual(o["result"]["debit_minor"], 10000)
+        o, *_ = self.step("get_document", doc_id="D2")
+        self.assertEqual(o["result"]["invoice_id"], "INV-2")
+        findings = {"findings": [{"type": "duplicate_invoice", "affected_ids": ["R1"],   # no
+                                  "claimed_amount_minor": 10000, "currency": "KZT",      # id
+                                  "evidence_ids": ["D1", "D2"], "explanation": "twice"}]}
+        o, r, term, _, _ = self.step("submit", findings=findings)
+        self.assertEqual((o["result"], r, term), ({"accepted": True}, 0, True))
+        score = ja.score_episode(str(d), findings, 3)
+        self.assertEqual((score["tp"], score["fp"], score["fn"]), (1, 0, 0))
+        self.assertAlmostEqual(score["return"], 0.994, places=9)
+
     def test_invalid_reset_config(self):
         for bad in ({"mode": "exam"}, "closed", [1]):
             with self.assertRaises(ValueError):

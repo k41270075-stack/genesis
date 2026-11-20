@@ -13,6 +13,12 @@
       "expected_amount_minor": 54936,
       "currency": "EUR",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DGDD6ASX4A",
+        "D3F6FDXCW3",
+        "RV27QMBOKN",
+        "RJ47M2E4KE"
+      ],
       "carrier_row_ids": [
         "RJ47M2E4KE"
       ],
@@ -113,6 +119,10 @@
       "expected_amount_minor": 69280,
       "currency": "EUR",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DN24RWA2CF",
+        "RUE5UTT4ZZ"
+      ],
       "carrier_row_ids": [
         "RUE5UTT4ZZ"
       ],
@@ -172,6 +182,10 @@
       "expected_amount_minor": 293750,
       "currency": "EUR",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DR4O3T7CMF",
+        "RBLKCAVQ3L"
+      ],
       "carrier_row_ids": [
         "RMGP6NFOQ7"
       ],

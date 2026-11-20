@@ -70,6 +70,10 @@ jobs:
           docker run --rm --network none --read-only --tmpfs /tmp \
             --cpus 2 --memory 4g vouchai check
           echo "wall time: $(( $(date +%s) - start )) s"
+      - name: jury adapter and emulation of the jury's checks (quick), no network
+        run: |
+          docker run --rm --network none --read-only --tmpfs /tmp --entrypoint python             vouchai -c "import judge_adapter as ja; print(ja.make_env, ja.score_episode)"
+          docker run --rm --network none --read-only --tmpfs /tmp             vouchai judge-selftest --quick --no-write
       - name: isolated official run, zone B and policy as different OS users, spy
         run: |
           docker run --rm --network none --read-only --tmpfs /tmp --user 0 vouchai             eval --isolated --policy simple_reconciler --config jury_like --seeds 0:5 --spy

@@ -250,7 +250,7 @@ def reward_checks() -> list[tuple[str, bool]]:
 def _second_submit() -> bool:
     e = LocalEnv()
     e.reset(9, "smoke")
-    e.step(_act("submit", findings={"episode_id": "x", "findings": []}))
+    e.step(_act("submit", findings={"findings": "not a list"}))      # invalid: -1
     e.step(_act("submit", findings=oracle_findings(generate_episode(9, "smoke"))))
     return len(e.results) == 1 and not e.results[0]["valid"]
 

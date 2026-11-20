@@ -12,6 +12,11 @@
       "expected_amount_minor": 139708,
       "currency": "KZT",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DIIYNPSRI2",
+        "RVZGUDFBXF",
+        "2027-03-01:GBP:KZT"
+      ],
       "carrier_row_ids": [
         "RVZGUDFBXF"
       ],
@@ -70,6 +75,12 @@
       "expected_amount_minor": 28044202,
       "currency": "KZT",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DIIYNPSRI2",
+        "DM76XAXD7S",
+        "R73ORX7WTF",
+        "RNQI2Y22AR"
+      ],
       "carrier_row_ids": [
         "RNQI2Y22AR"
       ],
@@ -170,6 +181,11 @@
       "expected_amount_minor": 5858606,
       "currency": "KZT",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DPDYV2UKRH",
+        "R73I7AMTJG",
+        "R5BCQWVQHJ"
+      ],
       "carrier_row_ids": [
         "R5BCQWVQHJ"
       ],
@@ -267,6 +283,12 @@
       "expected_amount_minor": 393733640,
       "currency": "KZT",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DLTW3DIIWB",
+        "DLOXQOVXRF",
+        "R5NQNF4IXR",
+        "R35MPJ4N4I"
+      ],
       "carrier_row_ids": [
         "R35MPJ4N4I"
       ],
@@ -419,6 +441,12 @@
       "expected_amount_minor": 75655477,
       "currency": "KZT",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "D2RSUKFYPT",
+        "DBULZTAPO7",
+        "RA3LRQIWB5",
+        "R7U265462Y"
+      ],
       "carrier_row_ids": [
         "R7U265462Y"
       ],
@@ -521,6 +549,12 @@
       "expected_amount_minor": 3141800,
       "currency": "KZT",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "D6QFXB24I6",
+        "DZ6B3CEFDZ",
+        "RCDBQSQG4C",
+        "R2ZOQQUKWZ"
+      ],
       "carrier_row_ids": [
         "R2ZOQQUKWZ"
       ],
@@ -621,6 +655,11 @@
       "expected_amount_minor": 145361,
       "currency": "KZT",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DG2XOMONQK",
+        "RQPOPLEKQ4",
+        "2027-03-08:EUR:KZT"
+      ],
       "carrier_row_ids": [
         "RQPOPLEKQ4"
       ],
@@ -678,6 +717,11 @@
       "expected_amount_minor": 4003949,
       "currency": "KZT",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DBQ5SPNSAJ",
+        "RRGESYRKO7",
+        "2027-03-23:GBP:KZT"
+      ],
       "carrier_row_ids": [
         "RRGESYRKO7"
       ],
@@ -735,6 +779,10 @@
       "expected_amount_minor": 21489840,
       "currency": "KZT",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DBFJHDZVOA",
+        "RXEDQYEF6L"
+      ],
       "carrier_row_ids": [
         "RXEDQYEF6L"
       ],
@@ -785,6 +833,10 @@
       "expected_amount_minor": 201159270,
       "currency": "KZT",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DYJRDQ7FJB",
+        "RAL6U4FXY3"
+      ],
       "carrier_row_ids": [
         "RPT7RWO3FW"
       ],

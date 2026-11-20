@@ -12,6 +12,11 @@
       "expected_amount_minor": 367422,
       "currency": "EUR",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DBH7ALATCS",
+        "RFRR6LQ6DN",
+        "RF4RLBL35H"
+      ],
       "carrier_row_ids": [
         "RITVHJMCSL"
       ],
@@ -109,6 +114,12 @@
       "expected_amount_minor": 169008,
       "currency": "EUR",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DYUZXMGYJV",
+        "DBH7ALATCS",
+        "RF4RLBL35H",
+        "RD2BS2AWBL"
+      ],
       "carrier_row_ids": [
         "RD2BS2AWBL"
       ],
@@ -260,6 +271,12 @@
       "expected_amount_minor": 104860,
       "currency": "EUR",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "D3BEVPAEO3",
+        "DA4HP4CQIR",
+        "RECB3XOMHH",
+        "RWVDH6H6ZV"
+      ],
       "carrier_row_ids": [
         "RWVDH6H6ZV"
       ],
@@ -362,6 +379,12 @@
       "expected_amount_minor": 5300,
       "currency": "EUR",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DHSPSSRXDO",
+        "DAQNB74XVX",
+        "RKOJVEKVVR",
+        "RQAELJWNKV"
+      ],
       "carrier_row_ids": [
         "RQAELJWNKV"
       ],
@@ -462,6 +485,11 @@
       "expected_amount_minor": 365232,
       "currency": "EUR",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "D5456LCBQI",
+        "RYVUEGB3ZK",
+        "2027-05-20:KWD:EUR"
+      ],
       "carrier_row_ids": [
         "RYVUEGB3ZK"
       ],
@@ -519,6 +547,11 @@
       "expected_amount_minor": 78935,
       "currency": "EUR",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DFVFWWZZIW",
+        "RNRINQYBMA",
+        "2027-05-27:KWD:EUR"
+      ],
       "carrier_row_ids": [
         "RNRINQYBMA"
       ],
@@ -576,6 +609,10 @@
       "expected_amount_minor": 39680,
       "currency": "EUR",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DCO6PLCFAB",
+        "ROMICY2EH3"
+      ],
       "carrier_row_ids": [
         "ROMICY2EH3"
       ],
@@ -626,6 +663,10 @@
       "expected_amount_minor": 15000,
       "currency": "EUR",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DKAPGMXUZP",
+        "RFNLC6AGGU"
+      ],
       "carrier_row_ids": [
         "RFNLC6AGGU"
       ],

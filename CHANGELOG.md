@@ -1,12 +1,32 @@
 # Changelog
 
 Версии данных: `schema_version`, `generator_version`, `env_version`,
-`reward_version` (`shared-v1`), `config_version`. Любое изменение генерации
-поднимает версию генератора и золотые хеши (`tests/golden.json`).
+`reward_version` (`shared-v2`; `shared-v1` до 1.3.0), `config_version`. Любое
+изменение генерации поднимает версию генератора и золотые хеши (`tests/golden.json`).
 
-## 1.3.0 — в работе
+## 1.3.0 — 2026-11-21
 
-Доводка под опубликованные «Определения проверок» жюри (20.11.2026).
+Доводка под опубликованные «Определения проверок» жюри (20.11.2026) и ответы
+организаторов (21.11). Открытые таблицы при тех же seed и конфиге не изменились
+(золотые хеши прежние); изменились truth (`evidence_ids`), provenance и версии.
+
+- Эмулятор проверок жюри `python -m vouchai judge-selftest` (только через адаптер):
+  C01–C20, D01–D20, 20 тестов matcher + M01–M12, P01–P20 → `reports/JURY_SELFTEST.md`.
+- Рецепты D01–D20 (`recipes/jury_d01_d20.json`) и `python -m vouchai judge-recipes`
+  → `reports/RECIPES.md`; новые ручки конфига `placement: "strict"` (заказанное
+  ставится ровно так: перерисовка событий и мира от seed, без подмены X1↔X2 и без
+  тихого пропуска) и `distractors.require` (обязательные законные двойники).
+- Независимый преобразователь парных проверок по тексту жюри
+  (`vouchai/harness/jury_transform.py`, режимы listed / blind / lazy) и машинный
+  список полей с ID `schemas/id_fields.json`.
+- `episode_id` в ответе необязателен (организаторы, 21.11); загрузчик принимает
+  единую фикстуру жюри: плоская папка или `public/`, таблицы `.csv`/`.jsonl`/`.json`,
+  минимальный manifest, необязательный `policy.json`, truth списком и без `issue_id`.
+- Инженерные якоря: `docs/LIMITATIONS.md` — каждое ограничение со сценарием и
+  измерением; `docs/VERSIONS.md`; в `reports/FAILURE_ANALYSIS.md` — исправления с
+  замером до/после и неустранённый предел (политика `silence`).
+- README переписан под протокол жюри; адаптер и фикстуры в образе; CI запускает
+  эмулятор жюри в контейнере без сети.
 
 - `judge_adapter.py` в корне: `generate_episode`, `make_env` (`reset(seed, config)`
   с `mode` closed/train и `episode_dir`, `step({"name", "args"})`, наблюдения с

@@ -12,6 +12,11 @@
       "expected_amount_minor": 162240,
       "currency": "USD",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DK3KF4UR7G",
+        "RH5DFBGZSW",
+        "RAGUIA4PWT"
+      ],
       "carrier_row_ids": [
         "REF7UOQQLQ"
       ],
@@ -109,6 +114,12 @@
       "expected_amount_minor": 18300,
       "currency": "USD",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DS74TVUNMK",
+        "DK3KF4UR7G",
+        "RAGUIA4PWT",
+        "R7PWZ6S6KJ"
+      ],
       "carrier_row_ids": [
         "R7PWZ6S6KJ"
       ],
@@ -259,6 +270,11 @@
       "expected_amount_minor": 449,
       "currency": "USD",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DJDIZ45226",
+        "RUXLF2XIJI",
+        "2027-05-21:EUR:USD"
+      ],
       "carrier_row_ids": [
         "RUXLF2XIJI"
       ],
@@ -316,6 +332,11 @@
       "expected_amount_minor": 131113,
       "currency": "USD",
       "tolerance_minor": 1,
+      "evidence_ids": [
+        "DTIX3ETJNH",
+        "RA6T6XUDOT",
+        "2027-04-30:EUR:USD"
+      ],
       "carrier_row_ids": [
         "RA6T6XUDOT"
       ],
@@ -373,6 +394,10 @@
       "expected_amount_minor": 51060,
       "currency": "USD",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "D4L7MU7T2U",
+        "RRB6KPI7Q6"
+      ],
       "carrier_row_ids": [
         "RRG7YJLVGB"
       ],

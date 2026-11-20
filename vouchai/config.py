@@ -35,6 +35,11 @@ ERROR_VARIANTS = {
 IMPLEMENTED_TYPES = ERROR_TYPES
 INTERACTIONS = ("partial_fx_boundary", "duplicate_with_partial")
 MIXES = ("regular", "clean", "interaction")
+PLACEMENTS = ("lenient", "strict")
+# Legitimate look-alikes a config can require (distractors.require); each name
+# is checked on the clean books by episode._doubles.
+REQUIRABLE = ("split_payment", "refund", "repeated_amounts", "boundary", "credit_note",
+              "fee", "two_step", "multi_invoice")
 MAX_ERRORS = 12
 OFFSETS = ("+05:00", "+06:00", "+03:00", "+00:00", "-05:00", "+09:00", "-03:00", "+05:30")
 MONTHS_2027 = tuple(f"2027-{m:02d}-01" for m in range(1, 13))
@@ -73,7 +78,10 @@ _BASE: dict[str, Any] = {
     "mix": "regular",
     "errors": _errors({t: {"range": [0, 2]} for t in ERROR_TYPES}),
     "interactions": {"partial_fx_boundary": 0, "duplicate_with_partial": 0},
-    "distractors": {"density": "0.3", "phantom_targets": True},
+    "distractors": {"density": "0.3", "phantom_targets": True, "require": []},
+    # lenient: an error without any admissible target is skipped late (recorded in
+    # provenance.unplaced_errors) and X1/X2 fall back to each other; strict: never.
+    "placement": "lenient",
     "render": {"id_seed": 0, "order_seed": 0},
 }
 
@@ -300,6 +308,14 @@ def validate(cfg: dict[str, Any]) -> None:
     if total > MAX_ERRORS:
         raise ConfigError(f"at most {MAX_ERRORS} errors per episode (an interaction counts 2)")
 
+    if cfg["placement"] not in PLACEMENTS:
+        raise ConfigError(f"placement must be one of {list(PLACEMENTS)}")
+    require = cfg["distractors"]["require"]
+    if not isinstance(require, list) or any(r not in REQUIRABLE for r in require):
+        raise ConfigError(f"distractors.require must list names from {list(REQUIRABLE)}")
+    if "boundary" in require and cfg["company"]["timezone"] == "+00:00":
+        raise ConfigError("distractors.require 'boundary' needs a company timezone other "
+                          "than +00:00 (local and UTC dates must differ)")
     density = _fraction(cfg["distractors"]["density"], "distractors.density")
     if not 0 <= density <= Fraction(6, 10):
         raise ConfigError("distractors.density must be within [0, 0.6]")

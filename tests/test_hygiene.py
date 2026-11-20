@@ -18,8 +18,9 @@ BANNED_MODULES = {"random", "secrets", "uuid", "zoneinfo", "pickle", "shelve", "
 BANNED_CALLS = {"hash", "eval", "exec", "compile", "float", "__import__", "input"}
 BANNED_ATTRS = {"now", "today", "utcnow", "getcontext", "setcontext", "localcontext",
                 "utcfromtimestamp", "fromtimestamp", "localtime", "time_ns"}
-# time.monotonic is allowed only for timeouts and report timing.
-ALLOWED_TIME_ATTRS = {"monotonic"}
+# time.monotonic is allowed only for timeouts and report timing; time.sleep only
+# in the jury emulation (C18: a policy that thinks longer than the time limit).
+ALLOWED_TIME_ATTRS = {"monotonic", "sleep"}
 # The scorecard is a test suite in module form: it compares rewards with float
 # literals (0.0, 1.0, -1.0) and feeds a float amount on purpose (an attack).
 FLOAT_LITERAL_OK = {"vouchai/harness/scorecard.py"}
@@ -29,7 +30,9 @@ PATH_JOIN_FILES = {"vouchai/checks.py", "vouchai/cli.py", "vouchai/episode.py",
                    "vouchai/server/client.py", "vouchai_verify/core.py",
                    "vouchai_verify/__main__.py", "vouchai/harness/transform.py",
                    "vouchai/harness/dataset.py", "vouchai/harness/replay.py",
-                   "vouchai/harness/scorecard.py", "vouchai/harness/isolated.py"}
+                   "vouchai/harness/scorecard.py", "vouchai/harness/isolated.py",
+                   "vouchai/harness/recipes.py", "vouchai/harness/jury_transform.py",
+                   "vouchai/harness/jury_selftest.py"}
 
 
 def python_files(folder: Path):

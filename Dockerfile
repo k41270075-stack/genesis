@@ -22,6 +22,7 @@ COPY docs /app/docs
 COPY reports /app/reports
 COPY episodes /app/episodes
 COPY examples /app/examples
+COPY recipes /app/recipes
 
 # Unprivileged user. The environment and grader run in a child process of the
 # caller (VouchAIEnv); separate OS users per zone are listed in docs/LIMITATIONS.md.

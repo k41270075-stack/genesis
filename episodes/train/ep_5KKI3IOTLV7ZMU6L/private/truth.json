@@ -12,6 +12,10 @@
       "expected_amount_minor": 266470,
       "currency": "USD",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DNV6UKLBDF",
+        "RTCRAOETSR"
+      ],
       "carrier_row_ids": [
         "RWGEW655MR"
       ],
@@ -71,6 +75,10 @@
       "expected_amount_minor": 205554,
       "currency": "USD",
       "tolerance_minor": 0,
+      "evidence_ids": [
+        "DZX6W3TLE2",
+        "RQ2JQKJDUZ"
+      ],
       "carrier_row_ids": [
         "RQ2JQKJDUZ"
       ],

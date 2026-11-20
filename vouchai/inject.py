@@ -505,9 +505,11 @@ def duplicate_with_partial(ctx: Context, s: Stream) -> list[IssueSpec]:
 
 
 def inject(ctx: Context, stream: Stream, errors_cfg: dict, interactions: dict,
-           lenient: bool = False, unplaced: list | None = None) -> list[IssueSpec]:
+           lenient: bool = False, unplaced: list | None = None,
+           fallback: bool = True) -> list[IssueSpec]:
     """Apply interactions first, then every configured error type; each draws
-    from its own sub-stream."""
+    from its own sub-stream. fallback=False (strict placement) never replaces
+    one interaction scenario by the other."""
     specs: list[IssueSpec] = []
     # Each interaction falls back to the other one when the books offer no target
     # (X1 needs an edge payment whose UTC-date rate differs from the local one).
@@ -515,7 +517,7 @@ def inject(ctx: Context, stream: Stream, errors_cfg: dict, interactions: dict,
             + ["X2"] * interactions.get("duplicate_with_partial", 0))
     for i, name in enumerate(plan):
         s = stream.child(f"interaction/{i}")
-        order = [name, "X2" if name == "X1" else "X1"]
+        order = [name, "X2" if name == "X1" else "X1"] if fallback else [name]
         for which in order:
             try:
                 specs += (partial_fx_boundary(ctx, s) if which == "X1"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vouchai"
-version = "1.2.0"
+version = "1.3.0"
 description = "RL environment for training AI financial auditors: synthetic companies, investigation tools, hidden accounting errors and an evidence-based reward."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -21,6 +21,7 @@ include = ["vouchai*", "vouchai_verify*"]
 [tool.ruff]
 target-version = "py310"
 line-length = 100
+extend-exclude = ["site"]   # the web demo has its own toolchain
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "I", "UP"]

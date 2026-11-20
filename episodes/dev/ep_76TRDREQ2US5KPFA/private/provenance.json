@@ -1,10 +1,10 @@
 {
   "versions": {
-    "env_version": "1.2.0",
+    "env_version": "1.3.0",
     "schema_version": "1.0",
-    "generator_version": "1.2.0",
+    "generator_version": "1.3.0",
     "config_version": "1.0",
-    "reward_version": "shared-v1",
+    "reward_version": "shared-v2",
     "protocol": "vouchai/1"
   },
   "seed": 102,
@@ -71,14 +71,17 @@
     },
     "distractors": {
       "density": "3/10",
-      "phantom_targets": true
+      "phantom_targets": true,
+      "require": []
     },
+    "placement": "lenient",
     "render": {
       "id_seed": 0,
       "order_seed": 0
     },
     "preset": "dev"
   },
+  "event_draw": 0,
   "attempt": 0,
   "unplaced_errors": [],
   "mutations": [
@@ -127,6 +130,9 @@
   ],
   "doubles": {
     "D2_split_payments": 4,
+    "D2_D19_split_payments": 5,
+    "D1_D9_D21_repeated_amounts": 27,
+    "D7_edge_payments": 0,
     "D4_refunds": 0,
     "D5_fees": 3,
     "D10_D20_credit_notes": 1,
