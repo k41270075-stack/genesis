@@ -25,8 +25,8 @@ python -m vouchai check
 
 Платформа сборки образа: `python:3.11-slim` (закреплён по digest), linux/amd64 и
 linux/arm64. Сеть при сборке нужна только для загрузки базового образа (шагов
-`RUN` нет), при проверке отключена. Проверка занимает около 2 минут в CI
-(2–5 минут на ноутбуке) и печатает время по разделам.
+`RUN` нет), при проверке отключена. Проверка занимает около 2 минут в CI на
+Linux и 4–6 минут на ноутбуке с Windows; печатает время по разделам.
 
 Официальный изолированный запуск — зона среды и оценщика (uid 10001) и политика
 (uid 10002, пустое окружение) под разными пользователями ОС; политика-шпион
@@ -42,7 +42,8 @@ docker run --rm --network none --read-only --tmpfs /tmp --user 0 vouchai \
 
 ## Подключение среды (Python-импорт)
 
-Из корня репозитория или с `PYTHONPATH=<путь к репозиторию>`:
+Скрипт в корне репозитория или `PYTHONPATH=<путь к репозиторию>` (в PowerShell:
+`$env:PYTHONPATH="<путь>"`; то же нужно для `--policy pkg.module:Class`):
 
 ```python
 from vouchai import VouchAIEnv
@@ -56,6 +57,8 @@ results = env.finalize()             # P, R, F1, return, steps, termination по
 env.close()
 ```
 
+- Первое наблюдение содержит `action_formats` — пример каждого действия и полного
+  ответа, так что LLM-агенту ничего не нужно угадывать.
 - Действия: `list_records(table, cursor, limit)`, `get_record(table, id)`,
   `get_document(doc_id)`, `calculator(expression)`, `submit(findings)` — схема
   `schemas/action.json`; наблюдение — `schemas/observation.json`.
@@ -66,7 +69,8 @@ env.close()
 - Генератор, эталон и оценщик живут в дочернем процессе. Это граница по процессам;
   граница по правам ОС — `eval --isolated` выше (см. `docs/LIMITATIONS.md`).
 - В `eval` награда на каждом шаге 0, итоги — через `finalize()`. В `train`
-  терминальная награда возвращается агенту.
+  терминальная награда возвращается агенту, а при неверной структуре ответа
+  `info["grade"]["errors"]` объясняет, какого поля не хватило.
 - Готовую или преобразованную папку эпизода можно загрузить:
   `env.reset(options={"episode_dir": "episodes/dev/ep_…"})` (относительный путь — от
   текущей папки).
@@ -123,9 +127,9 @@ jury_like --seeds 0:20` (среда — в дочернем процессе). `
 | Ни один из 10 проверенных «пустых» признаков (секунды, символы ID, день недели, круглость суммы, позиция строки, похожие документы рядом) не отличает цели ошибок от подобранных контрольных документов: \|AUC − 0,5\| ≤ 0,1 | `reports/LEAK_AUDIT.md`, `tests/test_attacks.py` | `python -m vouchai report` |
 | Награду нельзя обмануть: дубли, «пометить всё», угаданные ID, текст объяснения, валюта документа, однострочные признаки | `tests/test_grader.py`, `reports/FAILURE_ANALYSIS.md` | `python -m vouchai report` |
 | Oracle получает 1.0, базовые политики — заметно меньше; P, R, F1, награда, шаги и время отдельно | `reports/BASELINES.md` | `python -m vouchai demo` |
-| Задача решаема по открытым данным: скриптовый аудитор, видящий только наблюдения, находит все ошибки с полными доказательствами примерно за 15 шагов (F1 = 1.0), наивная сверка — около 0,25 | `tests/test_auditor.py`, `reports/BASELINES.md` | `python -m vouchai run --policy vouchai_verify.auditor:Auditor --config jury_like` |
+| Задача решаема по открытым данным: скриптовый аудитор, видящий только наблюдения, находит все ошибки с полными доказательствами примерно за 15 шагов (F1 = 1.0), наивная сверка — около 0,25 на dev (0,34 на `jury_like` 0:20) | `tests/test_auditor.py`, `reports/BASELINES.md` | `python -m vouchai run --policy vouchai_verify.auditor:Auditor --config jury_like` |
 | Повтор seed и действий точен до байта, на Windows и Linux | `tests/golden.json`, `tests/test_repro.py`, CI на двух ОС | `python -m vouchai replay` |
-| Перестановка строк и смена ID (в том числе враждебная) сохраняют ответ oracle и награду | `tests/test_repro.py`, `tests/test_adapters.py` | `python -m vouchai transform ep --out ep2 --hostile` |
+| Перестановка строк и смена ID (в том числе враждебная) сохраняют ответ oracle и награду | `tests/test_repro.py`, `tests/test_adapters.py` | `python -m vouchai transform ep7 --out ep7b --hostile` (после `generate ... --out ep7`) |
 
 Самопроверка — по нашей интерпретации раздела 10 ТЗ (`reports/SCORECARD.md`);
 официальные определения проверок организаторы пришлют отдельно, баллы ставит жюри.
@@ -153,6 +157,7 @@ jury_like --seeds 0:20` (среда — в дочернем процессе). `
 |---|---|
 | `vouchai/` | генератор, среда, оценщик, политики, харнесс (только стандартная библиотека) |
 | `vouchai/grader/` | общий matcher и награда: нормализация, допуски, выбор при неоднозначности |
+| `VOUCHAI_KEY` | секретный ключ корня случайности для закрытого прогона (видит только зона оценщика) |
 | `vouchai/adapters/` | адаптеры политик: Python-объект, отдельный процесс (JSON lines), базовые политики |
 | `vouchai_verify/` | независимый верификатор: не импортирует `vouchai`; скриптовый аудитор |
 | `episodes/train`, `episodes/dev` | 10 + 10 открытых эпизодов с паспортами `PASSPORT.md` |
@@ -176,7 +181,7 @@ python -m vouchai transform ep7 --out ep7b --hostile
 python -m vouchai replay trajectories.jsonl --index episodes.jsonl
 python -m vouchai build-dataset                  # пересобрать episodes/, траектории, отчёт
 python -m vouchai report                         # разбор сбоев и аудит утечек
-python -m vouchai scorecard                      # самопроверка по нашей интерпретации раздела 10
+python -m vouchai scorecard                      # самопроверка; пишет reports/SCORECARD.md на новых seed
 ```
 
 ## Четыре типа ошибок и два сценария
@@ -188,11 +193,12 @@ python -m vouchai scorecard                      # самопроверка по
 
 ## Предсказание
 
-Эпизод `seed = 28112026`, конфиг `jury_like`, версия 1.1.0 — на любой машине:
+Эпизод `seed = 28112026`, конфиг `jury_like`, версия 1.2.0 — на любой машине:
 
-- `episode_id = ep_T4LMV6SV6AMNNY6C`;
-- sha256 открытых таблиц `f27d1a3f2e5a8317a2aeec7862309324c13d98613ea90a1c1383466db09019bc` — это
-  `cat ledger.csv invoices.jsonl payments.jsonl fx.csv | sha256sum` в папке `public/`;
+- `episode_id = ep_QMQXXNPCGL35J5L4`;
+- sha256 открытых таблиц `e421ba1a2f923cc43e1303a54e332b3a77a5b4e90574451464b0e1c3a65ae03b` —
+  sha256 подряд записанных `ledger.csv`, `invoices.jsonl`, `payments.jsonl`, `fx.csv` из
+  `public/` (на любой ОС: `python -c "import hashlib,pathlib as p;print(hashlib.sha256(b''.join(p.Path('ep/public',f).read_bytes() for f in ('ledger.csv','invoices.jsonl','payments.jsonl','fx.csv'))).hexdigest())"`);
 - награда: oracle 1.0, `vouchai_auditor` 0.978, простая сверка −1.0,
   случайный исследователь −1.0, «пометить всё» −1.0.
 

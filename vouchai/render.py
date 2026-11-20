@@ -42,6 +42,20 @@ FINDINGS_RULES = {
               "the error type below (not necessarily the value of a single row)",
     "materiality": "no materiality threshold: every deviation from this policy of at least one "
                    "unit of the base currency and at least 20 tolerances is an error",
+    "legitimate_rules": {
+        "duplicate_document": "two live invoices with the same entity_id, issued_at instant, "
+                              "currency and line_items; a copy cancelled by a credit note "
+                              "(credit_for) in the same period is not an error; same amount "
+                              "with other lines or another service period is not a duplicate",
+        "reversal": "an issuing entry reversed by a mirror entry (Dr 4000 / Cr 1200) does not "
+                    "count; only live issuing entries do",
+        "allocation_without_reference": "a payment with invoice_refs = null may relieve an "
+                                        "invoice when its amount equals the only open invoice "
+                                        "of that customer in that currency",
+        "two_step_receipt": "a receipt may first go to 2150 and be reclassified to 1200 later "
+                            "(normally within 0-3 days, before the end of the export)",
+        "unidentified_receipt": "invoice_refs = null and nothing relieved: may stay on 2150",
+    },
     "evidence": "cite at least one ID of every evidence group; at most 10 IDs; every ID must "
                 "exist in the public tables (row_id, doc_id, invoice_id, payment_id, fx id)",
     "types": {

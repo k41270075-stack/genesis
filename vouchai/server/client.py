@@ -69,7 +69,10 @@ class ProcessEnv:
             raise EnvProtocolError("ZONE_B_EXITED") from None
         if not line:
             raise EnvProtocolError("ZONE_B_EXITED")
-        response = json.loads(line)
+        try:
+            response = json.loads(line)
+        except ValueError:
+            raise EnvProtocolError("BAD_RESPONSE") from None
         if "error" in response:
             error = response["error"]
             raise EnvProtocolError(error.get("code", "ERROR"), error.get("message", ""))
@@ -135,6 +138,10 @@ class ProcessEnv:
                 proc.wait(timeout=10)
         except subprocess.TimeoutExpired:
             proc.kill()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
         finally:
             for stream in (proc.stdin, proc.stdout):
                 try:

@@ -33,8 +33,9 @@ def _code(finding: dict, record: dict, issues: list[dict], public: set[str],
         return "UNKNOWN_TYPE"
     if not issues:
         return "CLEAN_BOOKS (no error to find)"
-    same = [i for i in issues if i["type"] == finding["type"]
-            and set(i["affected_ids"]) == set(finding.get("affected_ids", []))]
+    affected = {str(x).strip() for x in finding.get("affected_ids", [])}
+    same = [i for i in issues if i["type"] == str(finding.get("type")).strip()
+            and set(i["affected_ids"]) == affected]
     if not same:
         if any(i["type"] == finding["type"] for i in issues):
             return "IDS_MISMATCH"
@@ -70,8 +71,12 @@ def act_rows(findings: list[dict], record: dict[str, Any], issues: list[dict],
             rows.append({"agent": agent, "truth": f"{i['issue_id']} {i['expected_amount_minor']}",
                          "verdict": "MATCH"})
         else:
-            rows.append({"agent": agent, "truth": "-",
-                         "verdict": _code(f, record, issues, public, base)})
+            code = _code(f, record, issues, public, base)
+            reason = m.get("fp_reason")
+            if reason and reason not in code.lower() and not code.startswith(
+                    ("AMOUNT", "EVIDENCE", "DUPLICATE", "CLEAN")):
+                code = f"{code} ({reason})"
+            rows.append({"agent": agent, "truth": "-", "verdict": code})
     for issue_id in record.get("missed_issue_ids", []):
         i = by_issue[issue_id]
         rows.append({"agent": "-", "truth": f"{issue_id} {i['type']} {i['affected_ids']} "

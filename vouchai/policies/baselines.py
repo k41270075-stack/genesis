@@ -167,12 +167,16 @@ class OraclePolicy:
 
     name = "oracle"
 
-    def __init__(self, answers: dict[str, dict]):
+    def __init__(self, answers: dict[str, dict], sequence: list[dict] | None = None):
         self.answers = answers
+        self.sequence = list(sequence or [])   # folders: one answer per episode, in order
+        self.current: dict | None = None
 
     def reset(self, *, seed: int | None = None) -> None:
-        pass
+        self.current = self.sequence.pop(0) if self.sequence else None
 
     def act(self, observation: dict) -> dict:
+        if self.current is not None:          # a renamed copy keeps the episode_id
+            return {"action": "submit", "findings": self.current}
         episode_id = observation["manifest"]["episode_id"]
         return {"action": "submit", "findings": self.answers[episode_id]}

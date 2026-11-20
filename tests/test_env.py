@@ -30,8 +30,9 @@ class ResetTest(unittest.TestCase):
     def test_first_observation(self):
         env = LocalEnv(mode="eval")
         obs, info = env.reset(3, "smoke")
-        self.assertEqual(set(obs), {"task", "manifest", "policy", "tools", "limits",
-                                    "steps_remaining"})
+        self.assertEqual(set(obs), {"task", "manifest", "policy", "tools", "action_formats",
+                                    "limits", "steps_remaining"})
+        self.assertEqual(set(obs["action_formats"]), set(obs["tools"]))
         self.assertEqual(obs["steps_remaining"], 100)
         self.assertEqual(obs["tools"], ["list_records", "get_record", "get_document",
                                         "calculator", "submit"])

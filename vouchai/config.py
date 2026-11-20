@@ -306,5 +306,5 @@ def validate(cfg: dict[str, Any]) -> None:
     cfg["distractors"]["density"] = f"{density.numerator}/{density.denominator}"
     for field in ("id_seed", "order_seed"):
         value = cfg["render"][field]
-        if type(value) is not int or value < 0:
-            raise ConfigError(f"render.{field} must be a non-negative int")
+        if type(value) is not int or value < 0 or value.bit_length() > 13000:
+            raise ConfigError(f"render.{field} must be a non-negative int of practical size")

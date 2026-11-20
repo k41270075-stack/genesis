@@ -255,7 +255,25 @@ def _int_or_none(text: str) -> int | None:
 
 
 def _str_or_none(text: str) -> str | None:
+    text = text.strip()
     return text if text != "" else None
+
+
+_ID_FIELDS = ("doc_id", "invoice_id", "payment_id", "entity_id", "credit_for",
+              "replaces_invoice_id")
+
+
+def _ids_as_text(row: dict) -> dict:
+    """IDs written as numbers or with spaces by external tools become plain text."""
+    for f in _ID_FIELDS:
+        if row.get(f) is not None:
+            row[f] = str(row[f]).strip()
+    if row.get("invoice_refs"):
+        row["invoice_refs"] = [str(x).strip() for x in row["invoice_refs"]]
+    for a in row.get("allocations") or []:
+        if a.get("invoice_id") is not None:
+            a["invoice_id"] = str(a["invoice_id"]).strip()
+    return row
 
 
 def read_tables(folder: str | Path) -> dict[str, list[dict[str, Any]]]:
@@ -263,21 +281,25 @@ def read_tables(folder: str | Path) -> dict[str, list[dict[str, Any]]]:
     pub = Path(folder)
 
     def read_csv(name: str) -> list[dict[str, str]]:
-        text = (pub / name).read_text(encoding="utf-8")
+        text = (pub / name).read_text(encoding="utf-8-sig")
         return list(csv.DictReader(io.StringIO(text, newline="")))
 
     def read_jsonl(name: str) -> list[dict]:
-        return [json.loads(line) for line in (pub / name).read_text(encoding="utf-8").splitlines()
+        return [_ids_as_text(json.loads(line))
+                for line in (pub / name).read_text(encoding="utf-8-sig").splitlines()
                 if line.strip()]
 
     ledger = [{
-        "row_id": r["row_id"], "timestamp": r["timestamp"], "account": r["account"],
+        "row_id": r["row_id"].strip(), "timestamp": r["timestamp"], "account": r["account"],
         "debit_minor": _int_or_none(r["debit_minor"]),
         "credit_minor": _int_or_none(r["credit_minor"]),
         "currency": r["currency"], "entity_id": _str_or_none(r["entity_id"]),
         "invoice_id": _str_or_none(r["invoice_id"]), "payment_id": _str_or_none(r["payment_id"]),
     } for r in read_csv("ledger.csv")]
-    fx = [{"id": fx_id(r["date"], r["source_currency"], r["target_currency"]), "date": r["date"],
+    # fx rows: an explicit id column (e.g. after a jury renaming) wins over the rule
+    fx = [{"id": (r.get("id") or "").strip() or fx_id(r["date"], r["source_currency"],
+                                                      r["target_currency"]),
+           "date": r["date"],
            "source_currency": r["source_currency"], "target_currency": r["target_currency"],
            "rate": r["rate"]} for r in read_csv("fx.csv")]
     return {"ledger": ledger, "invoices": read_jsonl("invoices.jsonl"),
@@ -292,13 +314,17 @@ def load_episode(episode_dir: str | Path, with_truth: bool = True) -> Episode:
     """
     root = Path(episode_dir)
     pub = root / "public" if (root / "public").is_dir() else root
-    manifest = json.loads((pub / "manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((pub / "manifest.json").read_text(encoding="utf-8-sig"))
     episode = Episode(episode_id=manifest["episode_id"], manifest=manifest,
-                      policy=json.loads((pub / "policy.json").read_text(encoding="utf-8")),
+                      policy=json.loads((pub / "policy.json").read_text(encoding="utf-8-sig")),
                       tables=read_tables(pub))
-    truth_path = root / "private" / "truth.json"
-    if with_truth and truth_path.is_file():
-        episode.issues = json.loads(truth_path.read_text(encoding="utf-8"))["issues"]
+    if with_truth:
+        for truth_path in (root / "private" / "truth.json", root / "truth.json",
+                           pub / "truth.json"):
+            if truth_path.is_file():
+                episode.issues = json.loads(truth_path.read_text(encoding="utf-8-sig"))["issues"]
+                episode.provenance["truth_found"] = True
+                break
     if (root / "private" / "clean" / "ledger.csv").is_file():
         episode.clean_tables = read_tables(root / "private" / "clean")
     if set(episode.tables) != set(TABLES):

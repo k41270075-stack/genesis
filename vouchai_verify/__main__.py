@@ -11,6 +11,24 @@ from .core import load
 from .passport import passport
 
 
+def _is_episode(path: Path) -> bool:
+    return (path / "public" / "manifest.json").is_file() or (path / "manifest.json").is_file()
+
+
+def _expand(items: list[str]) -> list[str]:
+    """Shell masks (cmd/PowerShell do not expand them) and parent folders."""
+    import glob
+    out: list[str] = []
+    for item in items:
+        paths = [Path(p) for p in sorted(glob.glob(item))] or [Path(item)]
+        for path in paths:
+            if _is_episode(path):
+                out.append(str(path))
+            elif path.is_dir():
+                out += [str(p) for p in sorted(path.iterdir()) if _is_episode(p)]
+    return out
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="python -m vouchai_verify",
                                      description="Independent verifier of VouchAI episodes.")
@@ -21,7 +39,11 @@ def main(argv=None) -> int:
     parser.add_argument("--json", action="store_true", help="machine-readable output")
     args = parser.parse_args(argv)
     all_ok = True
-    for folder in args.episode_dir:
+    folders = _expand(args.episode_dir)
+    if not folders:
+        print("no episode folders found", file=sys.stderr)
+        return 2
+    for folder in folders:
         episode = load(folder)
         result = report(episode)
         all_ok &= result["ok"]

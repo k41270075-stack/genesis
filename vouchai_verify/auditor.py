@@ -106,8 +106,11 @@ class Auditor:
                 inv = book.invoice_by_id[ident]
                 event = book.period_of(parse_instant(inv["issued_at"]))
                 rows = [r["row_id"] for e in book.issuing_entries(ident) for r in e
-                        if book.period_of(parse_instant(r["timestamp"])) != event]
+                        if book.period_of(parse_instant(r["timestamp"])) != event
+                        and r["account"] in ("1200", "4000")]
                 return [inv["doc_id"]] + rows[:1]
             entry = book.receipt_entry(ident) or []
-            return [book.payment_by_id[ident]["doc_id"]] + [r["row_id"] for r in entry][:1]
+            carriers = [r["row_id"] for r in entry if r["account"] in ("1010", "6100")
+                        and r["debit_minor"]]
+            return [book.payment_by_id[ident]["doc_id"]] + carriers[:2]
         return []

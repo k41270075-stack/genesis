@@ -304,8 +304,16 @@ def derive(book: Book, issue: dict, evidence: list[str]) -> int:
         event = parse_instant(doc["issued_at"] if is_invoice else doc["timestamp"])
         if book.period_of(parse_instant(own[0]["timestamp"])) == book.period_of(event):
             raise Insufficient("the cited entry is in the period of the document")
-        value = doc["total_minor"] if is_invoice else doc["amount_minor"]
-        return book.conv_policy(value, doc["currency"], event)
+        if is_invoice:
+            carriers = [r for r in own if r["account"] in ("1200", "4000")]
+            if not carriers:
+                raise Insufficient("the Dr 1200 / Cr 4000 row of the entry is not cited")
+            return Book.amount(carriers[0])
+        cash = [r for r in own if r["account"] == "1010" and r["debit_minor"]]
+        fee = [r for r in own if r["account"] == "6100" and r["debit_minor"]]
+        if not cash or (doc.get("fee_minor") and not fee):
+            raise Insufficient("the Dr 1010 (and Dr 6100) rows of the receipt are not cited")
+        return cash[0]["debit_minor"] + sum(r["debit_minor"] for r in fee[:1])
 
     raise Insufficient(f"unknown issue type {etype}")
 

@@ -49,9 +49,11 @@ def incompatibility(finding: Finding, issue: Issue, id_exists: Callable[[str], b
     if not all(id_exists(x) for x in finding.evidence_ids):
         return "evidence_id_unknown"
     cited = set(finding.evidence_ids)
-    if not all(cited.intersection(slot) for slot in issue.evidence_slots):
-        return "evidence_slot_missing"
-    return None
+    if all(cited.intersection(slot) for slot in issue.evidence_slots):
+        return None
+    if any(st and cited.issuperset(st) for st in issue.evidence_sets):
+        return None
+    return "evidence_slot_missing"
 
 
 def max_matching(edges: Sequence[Sequence[int]], n_right: int) -> list[int | None]:

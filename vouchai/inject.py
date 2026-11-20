@@ -385,6 +385,18 @@ def _shift_window(variant: str, world: World, event: datetime) -> tuple[int, int
     return (lo, hi) if lo <= hi else None
 
 
+def _cutoff_slots(kind: str, key: str, entry: str, ctx: Context) -> list[list[Ref]]:
+    """The document plus the rows that carry the amount: Dr 1200 (or the paired
+    Cr 4000) of an invoice entry; Dr 1010 and, with a bank fee, Dr 6100 of a receipt."""
+    if kind == "invoice":
+        return [[(kind, key)], [_rows(entry, ("1200", "4000"))]]
+    slots = [[(kind, key)], [_rows(entry, ("1010",))]]
+    pay = next(p for p in ctx.payments if p.key == key)
+    if pay.fee:
+        slots.append([_rows(entry, ("6100",))])
+    return slots
+
+
 def period_cutoff(ctx: Context, s: Stream, variants: list[str]) -> IssueSpec:
     options = []
     for variant in variants:
@@ -432,7 +444,7 @@ def period_cutoff(ctx: Context, s: Stream, variants: list[str]) -> IssueSpec:
             type="period_cutoff", variant=variant,
             affected=[(kind, key)],
             amount_rule=("rows", entry, accounts),
-            slots=[[(kind, key)], [_rows(entry)]],
+            slots=_cutoff_slots(kind, key, entry, ctx),
             absence_checks=[{"query": "no_posting_in_event_period", kind: key}],
             mutation={"decision": "posting_moment", "object": key,
                       "before": format_ts(old), "after": format_ts(new)},
