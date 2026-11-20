@@ -1,6 +1,7 @@
 import unittest
 
 from vouchai.jsonsafe import (
+    MAX_DEPTH,
     MAX_INPUT_BYTES,
     JsonInputError,
     dumps_canonical,
@@ -35,6 +36,24 @@ class UntrustedJsonTest(unittest.TestCase):
 
     def test_deep_nesting(self):
         self.assertIn(self.reason("[" * 100_000 + "]" * 100_000), ("too_deep", "malformed"))
+        # an explicit bound, not the interpreter's recursion limit (3.12 parses 5000 levels)
+        self.assertEqual(self.reason("[" * (MAX_DEPTH + 1) + "]" * (MAX_DEPTH + 1)), "too_deep")
+        self.assertIsInstance(loads_untrusted("[" * MAX_DEPTH + "]" * MAX_DEPTH), list)
+
+    def test_deep_action_is_malformed_on_every_python(self):
+        from vouchai.server.local import LocalEnv
+        deep = node = {"action": "calculator", "expression": "1"}
+        for _ in range(MAX_DEPTH + 5):
+            node["x"] = {}
+            node = node["x"]
+        env = LocalEnv(mode="train")
+        env.reset(3, "smoke")
+        for action in (deep, dumps_canonical(deep)):
+            obs, *_ = env.step(action)
+            self.assertEqual(obs["error"]["code"], "MALFORMED_ACTION")
+        obs, reward, terminated, *_ = env.step({"action": "submit", "findings": deep})
+        self.assertTrue(terminated)
+        self.assertEqual(reward, -1)
 
     def test_huge_int(self):
         self.assertEqual(self.reason("1" * 5000), "malformed")

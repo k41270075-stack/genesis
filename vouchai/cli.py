@@ -106,9 +106,9 @@ def main(argv: list[str] | None = None) -> int:
         from .harness.isolated import policy_worker
         return policy_worker(args.policy, args.spy, args.zone_b_pid)
     if args.command == "transform":
-        from .harness.transform import transform
         from .episode import load_episode, oracle_findings
         from .grader import Issue, grade
+        from .harness.transform import transform
         out = transform(args.src, args.out, seed=args.seed, hostile=args.hostile,
                         rename=not args.no_rename, shuffle=not args.no_shuffle,
                         reoffset=not args.no_reoffset)

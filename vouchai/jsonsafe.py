@@ -12,6 +12,24 @@ import json
 from typing import Any
 
 MAX_INPUT_BYTES = 1024 * 1024
+MAX_DEPTH = 64          # far above any real action; the same bound on every Python version
+
+
+def too_deep(obj: Any, limit: int = MAX_DEPTH) -> bool:
+    """True if lists/dicts nest deeper than `limit` (iterative, never recurses)."""
+    stack = [(obj, 1)]
+    while stack:
+        node, depth = stack.pop()
+        if isinstance(node, dict):
+            children = list(node.values())
+        elif isinstance(node, (list, tuple)):
+            children = list(node)
+        else:
+            continue
+        if depth > limit:
+            return True
+        stack.extend((child, depth + 1) for child in children)
+    return False
 
 
 class JsonInputError(ValueError):
@@ -52,14 +70,17 @@ def loads_untrusted(data: str | bytes, max_bytes: int = MAX_INPUT_BYTES) -> Any:
     else:
         raise JsonInputError("not_text")
     try:
-        return json.loads(text, parse_constant=_reject_constant,
-                          object_pairs_hook=_pairs_no_duplicates)
+        value = json.loads(text, parse_constant=_reject_constant,
+                           object_pairs_hook=_pairs_no_duplicates)
     except JsonInputError:
         raise
     except RecursionError:
         raise JsonInputError("too_deep") from None
     except ValueError:  # JSONDecodeError and int-length limit
         raise JsonInputError("malformed") from None
+    if too_deep(value):
+        raise JsonInputError("too_deep")
+    return value
 
 
 def dumps_canonical(obj: Any) -> str:

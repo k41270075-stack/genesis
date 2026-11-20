@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from ..jsonsafe import MAX_INPUT_BYTES, dumps_canonical
+from ..jsonsafe import MAX_INPUT_BYTES, dumps_canonical, too_deep
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -103,6 +103,8 @@ class ProcessEnv:
             params = {"action_json": "\x00too large" if too_large else action}
         else:
             try:
+                if too_deep(action):
+                    raise ValueError("too deep")
                 text = dumps_canonical(action)
                 if len(text) <= MAX_INPUT_BYTES:
                     params = {"action": action}
