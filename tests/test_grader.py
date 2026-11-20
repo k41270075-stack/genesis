@@ -93,7 +93,12 @@ class StructureTest(unittest.TestCase):
         self.assertInvalid({"findings": []}, "MISSING_FIELD", raw=True)
         self.assertInvalid({"episode_id": EP}, "MISSING_FIELD", raw=True)
         self.assertInvalid({"episode_id": EP, "findings": "[]"}, "WRONG_TYPE", raw=True)
-        self.assertInvalid({"episode_id": "ep_OTHER", "findings": []}, "EPISODE_MISMATCH", raw=True)
+        self.assertInvalid({"episode_id": 7, "findings": []}, "WRONG_TYPE", raw=True)
+        # a foreign episode_id is not a structure error (jury rule 8): everything is FP
+        r = submit(oracle(), episode_id="ep_OTHER")
+        self.assertTrue(r["valid"])
+        self.assertEqual((r["TP"], r["FP"], r["FN"]), (0, 3, 3))
+        self.assertEqual({m["fp_reason"] for m in r["matching"]}, {"episode_mismatch"})
         for field in ("type", "affected_ids", "claimed_amount_minor", "currency",
                       "evidence_ids", "explanation"):
             f = oracle()
@@ -150,12 +155,19 @@ class MatchingTest(unittest.TestCase):
         self.assertEqual((r["TP"], r["FP"], r["FN"], r["F1"], r["reward"]), (3, 0, 0, 1.0, 1.0))
 
     def test_normalization(self):
+        # lists are sets: repeats inside one list collapse (M01, M03)
         f = oracle()
-        f[0]["currency"] = " kzt "
-        f[0]["affected_ids"] = [" INV-1", "INV-1"]
-        f[0]["evidence_ids"] = ["INV-1 ", "R1", "R1", "R3"]
-        f[0]["type"] = " duplicate_invoice "
+        f[0]["affected_ids"] = ["INV-1", "INV-1"]
+        f[0]["evidence_ids"] = ["R3", "INV-1", "R1", "R1"]
         self.assertEqual(submit(f)["TP"], 3)
+        # IDs, type and currency are exact: no trimming, no case change (M06, rules 1, 4, 5)
+        for field, value in (("currency", " KZT"), ("currency", "kzt"),
+                             ("affected_ids", [" INV-1"]), ("evidence_ids", ["INV-1 ", "R1", "R3"]),
+                             ("type", "duplicate_invoice "), ("type", "Duplicate_invoice")):
+            f = oracle()
+            f[0][field] = value
+            r = submit(f)
+            self.assertEqual((r["TP"], r["FP"], r["FN"]), (2, 1, 1), (field, value))
 
     def test_no_id_substitution(self):
         # doc_id and business ID are both accepted because both are in the slot,

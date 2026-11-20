@@ -238,10 +238,10 @@ def reward_checks() -> list[tuple[str, bool]]:
             evidence_ids=[f"x{i}" for i in range(11)]))["reward"] == -1.0),
         _check("1001-character explanation is invalid (-1)", lambda: g(mutated(
             explanation="x" * 1001))["reward"] == -1.0),
-        _check("foreign episode_id is invalid (-1)",
-               lambda: g(f, episode_id="ep_OTHER")["reward"] == -1.0),
-        _check("lower-case currency is normalized", lambda: g(mutated(
-            currency=first["currency"].lower()))["reward"] == 1.0),
+        _check("foreign episode_id matches nothing (all FP)",
+               lambda: g(f, episode_id="ep_OTHER")["TP"] == 0),
+        _check("currency is compared exactly (M06)", lambda: g(mutated(
+            currency=first["currency"].lower()))["TP"] == len(issues) - 1),
         _check("empty answer on clean books is 1.0", lambda: g([], 0, [])["reward"] == 1.0),
         _check("second submit cannot change the result", _second_submit),
     ]

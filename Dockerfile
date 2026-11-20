@@ -13,7 +13,7 @@ ENV PYTHONHASHSEED=0 \
     HOME=/tmp
 
 WORKDIR /app
-COPY pyproject.toml README.md LICENSE NOTICE CHANGELOG.md Dockerfile episodes.jsonl trajectories.jsonl /app/
+COPY pyproject.toml README.md LICENSE NOTICE CHANGELOG.md Dockerfile episodes.jsonl trajectories.jsonl judge_adapter.py /app/
 COPY vouchai /app/vouchai
 COPY vouchai_verify /app/vouchai_verify
 COPY tests /app/tests
@@ -21,6 +21,7 @@ COPY schemas /app/schemas
 COPY docs /app/docs
 COPY reports /app/reports
 COPY episodes /app/episodes
+COPY examples /app/examples
 
 # Unprivileged user. The environment and grader run in a child process of the
 # caller (VouchAIEnv); separate OS users per zone are listed in docs/LIMITATIONS.md.

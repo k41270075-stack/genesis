@@ -7,3 +7,10 @@
 .venv
 runs
 out
+site
+extras
+tools
+PLAN*.md
+netlify.toml
+.claude
+site/node_modules

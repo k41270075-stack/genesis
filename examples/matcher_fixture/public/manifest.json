@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "ep_FIXTURE_A",
+  "base_currency": "KZT",
+  "currency_exponents": {"KZT": 2},
+  "period_start": "2027-01-01T00:00:00+05:00",
+  "period_end": "2027-02-01T00:00:00+05:00",
+  "timezone": "+05:00",
+  "rounding": "half_even",
+  "counts": {"ledger_rows": 5, "invoices": 3, "payments": 0, "fx_rates": 0, "documents": 3},
+  "note": "Hand-made matcher fixture in the shape of the jury's block 3: error A on R1, 10000 KZT, evidence {D1, D2}, tolerance 0. D3 is an extra existing document; U does not exist."
+}

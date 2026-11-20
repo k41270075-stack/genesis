@@ -1,0 +1,14 @@
+{
+  "episode_id": "ep_FIXTURE_A",
+  "issues": [
+    {
+      "issue_id": "A",
+      "type": "duplicate_invoice",
+      "affected_ids": ["R1"],
+      "expected_amount_minor": 10000,
+      "currency": "KZT",
+      "tolerance_minor": 0,
+      "evidence_ids": ["D1", "D2"]
+    }
+  ]
+}

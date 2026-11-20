@@ -4,6 +4,25 @@
 `reward_version` (`shared-v1`), `config_version`. Любое изменение генерации
 поднимает версию генератора и золотые хеши (`tests/golden.json`).
 
+## 1.3.0 — в работе
+
+Доводка под опубликованные «Определения проверок» жюри (20.11.2026).
+
+- `judge_adapter.py` в корне: `generate_episode`, `make_env` (`reset(seed, config)`
+  с `mode` closed/train и `episode_dir`, `step({"name", "args"})`, наблюдения с
+  `remaining_steps`, `records`, `accepted`), `score_episode` → `{tp, fp, fn,
+  precision, recall, f1, return}`, при неверной структуре `return=-1` и `null`,
+  журнал оценщика `VOUCHAI_JUDGE_JOURNAL`. Среда — дочерний процесс (зона B).
+- Matcher по точным соглашениям жюри: ID, тип и валюта сравниваются точно (без
+  обрезки пробелов и смены регистра); чужой `episode_id` — FP, а не −1; выбор среди
+  максимальных паросочетаний — наименьшая последовательность `(issue_id, индекс)`.
+- В truth новое поле `evidence_ids` — минимальный полный набор для oracle;
+  `tolerance_minor` по умолчанию 0; две ошибки с одинаковыми типом и `affected_ids`
+  допустимы (M10, M11). Схема — `schemas/truth.json`, ручная фикстура —
+  `examples/matcher_fixture`.
+- Тесты: 20 тестов блока 3 и примеры M01–M12 (`tests/test_matcher_jury.py`),
+  контракт адаптера (`tests/test_judge_adapter.py`).
+
 ## 1.2.0 — 2026-11-20
 
 Вторая волна ночного разбора (данные, воспроизводимость, код, red team).

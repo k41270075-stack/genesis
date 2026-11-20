@@ -27,7 +27,7 @@ def grade(payload: Any, *, episode_id: str, issues: Sequence[Issue],
     check_unique(list(issues))
     id_exists = public_ids if callable(public_ids) else public_ids.__contains__
 
-    findings, errors = validate(payload, episode_id)
+    findings, errors = validate(payload)
     if errors:
         reward = invalid_reward()
         return {
@@ -42,7 +42,11 @@ def grade(payload: Any, *, episode_id: str, issues: Sequence[Issue],
             "matching": [],
         }
 
-    assignment, reasons = match(findings, issues, id_exists)
+    if payload["episode_id"] == episode_id:
+        assignment, reasons = match(findings, issues, id_exists)
+    else:   # an answer about another episode matches nothing (FP), it is not malformed
+        assignment = [None] * len(findings)
+        reasons = ["episode_mismatch"] * len(findings)
     matched = {a for a in assignment if a is not None}
     tp = len(matched)
     fp = len(findings) - tp

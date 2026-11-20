@@ -145,6 +145,8 @@ def _map_issue(issue: dict[str, Any], rid) -> dict[str, Any]:
     out["carrier_row_ids"] = [rid(x) for x in issue["carrier_row_ids"]]
     out["evidence_slots"] = [sorted(rid(x) for x in slot) for slot in issue["evidence_slots"]]
     out["evidence_sets"] = [[rid(x) for x in st] for st in issue["evidence_sets"]]
+    if "evidence_ids" in issue:
+        out["evidence_ids"] = [rid(x) for x in issue["evidence_ids"]]
     out["absence_checks"] = [{k: (rid(v) if k in ("invoice_id", "payment_id") else v)
                               for k, v in c.items()} for c in issue["absence_checks"]]
     return out

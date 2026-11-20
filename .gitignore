@@ -10,3 +10,5 @@ dist/
 /runs/
 /out/
 *.tar
+site/node_modules/
+site/dist/

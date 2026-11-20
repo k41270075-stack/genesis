@@ -254,6 +254,8 @@ def render(world: World, invoices: list[Invoice], payments: list[Payment],
             "expected_amount_minor": spec.amount,
             "currency": world.base_currency,
             "tolerance_minor": TOLERANCE[spec.type],
+            # one minimal complete set: what an oracle cites (jury field name)
+            "evidence_ids": list(sets[0]),
             "carrier_row_ids": [row_id[k] for k in spec.carrier_rows],
             "evidence_slots": slots,
             "evidence_sets": sets,
