@@ -8,11 +8,11 @@ translates between their interface and ours:
 
   python_policy(obj)   any object with act(obs) / predict(obs) / __call__(obs)
   subprocess_policy(cmd)  a separate program speaking JSON lines on stdin/stdout:
-      <- {"event": "reset", "observation": ..., "info": ...}
-      <- {"event": "step", "observation": ..., "reward": ..., "terminated": ...,
-          "truncated": ..., "info": ...}
-      -> {"action": {...}}            (one line per event, except "close")
+      <- {"event": "reset", "observation": ...}   (the first observation of an episode)
+      <- {"event": "step", "observation": ...}    (every following observation)
+      -> {"action": {...}}                       (one line per event, except "close")
       <- {"event": "close"}
+    Rewards and info stay with the harness: in eval they carry nothing anyway.
   baseline(name)       our four baselines behind the same interface
 
 Seed, config and file paths never reach the policy.
@@ -101,9 +101,12 @@ def subprocess_policy(cmd: list[str] | str) -> SubprocessPolicy:
     return SubprocessPolicy(cmd)
 
 
-def baseline(name: str, schedule=None):
-    """Our versions of the four baseline policies behind the adapter interface."""
+def baseline(name: str, schedule=None, episode_dirs=None):
+    """Our versions of the four baseline policies behind the adapter interface.
+
+    The oracle needs the truth: give it the schedule (seed, config) it will be run
+    on, or the episode folders (for loaded or transformed episodes)."""
     if name not in BASELINE_NAMES:
         raise ValueError(f"unknown baseline {name!r}; known: {', '.join(BASELINE_NAMES)}")
     from ..harness.runner import make_policy
-    return PythonPolicy(make_policy(name, schedule), name)
+    return PythonPolicy(make_policy(name, schedule, episode_dirs), name)

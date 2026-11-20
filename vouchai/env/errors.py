@@ -8,7 +8,8 @@ UNKNOWN_ID is the same for a random, a deleted and a "private" ID.
 from __future__ import annotations
 
 ERROR_MESSAGES: dict[str, str] = {
-    "MALFORMED_ACTION": "Action must be a JSON object with a string field 'action'.",
+    "MALFORMED_ACTION": "Action must be a JSON object (at most 1 MB) with a string field "
+                        "'action'.",
     "UNKNOWN_ACTION": "Unknown action. Allowed: list_records, get_record, get_document, "
                       "calculator, submit.",
     "UNKNOWN_TABLE": "Unknown table. Allowed: ledger, invoices, payments, fx.",

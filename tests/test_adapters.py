@@ -43,6 +43,19 @@ class AdaptersTest(unittest.TestCase):
         self.assertEqual(run(baseline("oracle", SCHEDULE), SCHEDULE)["summary"]["mean_return"],
                          1.0)
 
+    def test_oracle_on_renamed_episode_folders(self):
+        import tempfile
+        from pathlib import Path
+
+        from vouchai.episode import generate_episode, save_episode
+        from vouchai.harness.transform import transform
+        with tempfile.TemporaryDirectory() as tmp:
+            a = save_episode(generate_episode(8002, "jury_like"), Path(tmp) / "a")
+            b = transform(a, Path(tmp) / "b", seed=3, hostile=True)
+            policy = baseline("oracle", episode_dirs=[b])
+            r = run(policy, [(0, None)], options_for=lambda s, c: {"episode_dir": str(b)})
+        self.assertEqual(r["summary"]["mean_return"], 1.0)
+
     def test_foreign_python_policy(self):
         r = run(python_policy(GymStyle()), SCHEDULE)
         self.assertEqual(r["summary"]["invalid"], 0)

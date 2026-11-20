@@ -79,6 +79,9 @@ class ProcessEnv:
               options: dict | None = None) -> tuple[dict, dict]:
         if type(seed) is bool:
             raise ValueError("seed must be a non-negative int")
+        if isinstance(options, dict) and options.get("episode_dir"):
+            # zone B runs in another working directory: send an absolute path
+            options = dict(options, episode_dir=str(Path(options["episode_dir"]).resolve()))
         try:
             result = self._call("reset", {"seed": seed, "config": config, "options": options})
         except EnvProtocolError as exc:
@@ -106,7 +109,10 @@ class ProcessEnv:
                 else:
                     params = {"action_json": "\x00too large"}
             except (TypeError, ValueError, RecursionError):
-                params = {"action_json": "\x00not serializable"}
+                if isinstance(action, dict) and action.get("action") == "submit":
+                    params = {"action": {"action": "submit", "findings": "unserializable"}}
+                else:
+                    params = {"action_json": "\x00not serializable"}
         r = self._call("step", params)
         return r["observation"], r["reward"], r["terminated"], r["truncated"], r["info"]
 

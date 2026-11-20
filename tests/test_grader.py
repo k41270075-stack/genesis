@@ -164,6 +164,12 @@ class MatchingTest(unittest.TestCase):
         f[0]["evidence_ids"] = ["D1", "R2", "R4"]  # other rows of the same postings
         self.assertEqual(submit(f)["TP"], 3)
 
+    def test_unicode_lookalike_currency_is_not_normalized(self):
+        for fake in ("kzſ", "\u212azt", "ＫＺＴ"):
+            f = oracle()
+            f[0]["currency"] = fake
+            self.assertEqual(submit(f)["TP"], 2, fake)
+
     def test_tolerance(self):
         f = oracle()
         f[1]["claimed_amount_minor"] += 1
@@ -236,7 +242,7 @@ class MatchingTest(unittest.TestCase):
 
 
 class PropertyTest(unittest.TestCase):
-    """Section 8.6 of the plan / the five inequalities of the task."""
+    """The five inequalities of the task (section 05) and docs/REWARD.md section 7."""
 
     def test_full_answer_beats_silence_on_errors(self):
         self.assertGreater(submit(oracle(), steps=99)["reward"], submit([], steps=0)["reward"])

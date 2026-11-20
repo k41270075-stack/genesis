@@ -145,7 +145,7 @@ def double_posting(ctx: Context, s: Stream, inv: Invoice | None = None) -> Issue
         mutation={"decision": "invoice_postings", "object": inv.key,
                   "before": [format_ts(first)], "after": [format_ts(first), format_ts(extra)]},
         derivation={"expected": "one issuing entry per invoice",
-                    "amount": "Dr 1200 of the second issuing entry"},
+                    "amount": "Dr 1200 of either of the two identical issuing entries"},
         objects={inv.key},
     )
 

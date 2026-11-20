@@ -28,8 +28,8 @@ CURRENCY_LEVEL = {
 
 _SYLLABLES = ("ka", "lor", "ven", "tri", "mo", "sal", "dar", "en", "qu", "bel", "tor", "ris",
               "na", "vel", "zan", "or", "mi", "tal", "ber", "sen", "ul", "rak", "fen", "do")
-_SUFFIXES = ("Trading", "Systems", "Logistics", "Foods", "Studio", "Partners", "Labs", "Group",
-             "Works", "Supply", "Media", "Textiles")
+_SUFFIXES = ("Systems", "Cloud", "Digital", "Studio", "Partners", "Labs", "Group", "Software",
+             "Works", "Tech", "Media", "Data")
 # Names that must never be produced (well-known brands); extend when needed.
 STOP_LIST = {"Tesla", "Kaspi", "Halyk", "Apple", "Amazon", "Visa", "Oracle", "Sber", "Samsung",
              "Toyota", "Nike", "Zara", "Uber", "Bolt", "Kolesa"}

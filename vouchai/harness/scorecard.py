@@ -160,7 +160,8 @@ def contract_checks() -> list[tuple[str, bool]]:
                error_spends(_act("get_record", table="ledger", id="nope"), "UNKNOWN_ID")),
         _check("non-object action: bounded error", error_spends([1, 2], "MALFORMED_ACTION")),
         _check("duplicate JSON keys rejected",
-               error_spends('{"action":"submit","action":"calculator"}', "MALFORMED_ACTION")),
+               error_spends('{"action":"calculator","action":"list_records"}',
+                            "MALFORMED_ACTION")),
         _check("calculator refuses code", error_spends(
             _act("calculator", expression="__import__('os')"), "CALC_ERROR")),
         _check("submit terminates", submit_terminates),
@@ -319,8 +320,10 @@ def scorecard(n_seeds: int = 20) -> tuple[str, Fraction]:
     total += eng_score
     lines += [f"## Engineering and explanation: {eng_score} of 10", ""]
     lines += [f"- {s}/2 {name}" for name, s in eng] + [""]
-    shown = total.numerator / total.denominator  # float-ok: report only
-    lines += [f"**Total (self-check): {shown:.2f} / 100**", "",
-              "Engineering items are self-assessed by the presence of artefacts; the jury "
-              "scores them 0/1/2.", ""]
+    passed = sum(1 for _, _, checks in sections for _, ok in checks if ok)
+    count = sum(len(checks) for _, _, checks in sections)
+    lines += [f"**Self-check: {passed} of our {count} checks pass. "
+              "The jury gives the points with its own checks.**", "",
+              "Engineering items are listed by the presence of artefacts; the jury scores "
+              "them 0/1/2.", ""]
     return "\n".join(lines), total

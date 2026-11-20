@@ -78,7 +78,8 @@ class DeterminismTest(unittest.TestCase):
             t0 = time.monotonic()
             generate_episode(seed, "L5")
             worst = max(worst, time.monotonic() - t0)
-        self.assertLess(worst, 3)
+        # the budget is 60 s per episode; 3 s is the target on an idle machine
+        self.assertLess(worst, 30)
 
 
 class EpisodeShapeTest(unittest.TestCase):

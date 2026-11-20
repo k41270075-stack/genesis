@@ -1,6 +1,12 @@
 import unittest
 
-from vouchai.jsonsafe import JsonInputError, dumps_canonical, loads_untrusted, roundtrips
+from vouchai.jsonsafe import (
+    MAX_INPUT_BYTES,
+    JsonInputError,
+    dumps_canonical,
+    loads_untrusted,
+    roundtrips,
+)
 
 
 class UntrustedJsonTest(unittest.TestCase):
@@ -22,10 +28,10 @@ class UntrustedJsonTest(unittest.TestCase):
             self.assertEqual(self.reason(text), "non_finite_number")
 
     def test_size_limit(self):
-        self.assertEqual(self.reason("x" * (256 * 1024 + 1)), "too_large")
-        self.assertEqual(self.reason(b"1" * (256 * 1024 + 1)), "too_large")
+        self.assertEqual(self.reason("x" * (MAX_INPUT_BYTES + 1)), "too_large")
+        self.assertEqual(self.reason(b"1" * (MAX_INPUT_BYTES + 1)), "too_large")
         # multi-byte characters count as bytes
-        self.assertEqual(self.reason('"' + "ж" * (128 * 1024) + '"'), "too_large")
+        self.assertEqual(self.reason('"' + "ж" * (MAX_INPUT_BYTES // 2) + '"'), "too_large")
 
     def test_deep_nesting(self):
         self.assertIn(self.reason("[" * 100_000 + "]" * 100_000), ("too_deep", "malformed"))

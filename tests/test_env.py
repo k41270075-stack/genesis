@@ -134,7 +134,7 @@ class ToolsTest(unittest.TestCase):
     def test_bounded_errors_spend_a_step(self):
         cases = [
             (None, "MALFORMED_ACTION"), ([], "MALFORMED_ACTION"), ("nope", "MALFORMED_ACTION"),
-            ('{"action":"submit","action":"calculator"}', "MALFORMED_ACTION"),
+            ('{"action":"calculator","action":"list_records"}', "MALFORMED_ACTION"),
             ({"action": 5}, "MALFORMED_ACTION"),
             (act("rm -rf"), "UNKNOWN_ACTION"),
             (act("list_records", table="truth"), "UNKNOWN_TABLE"),
@@ -182,6 +182,25 @@ class TerminationTest(unittest.TestCase):
             self.assertEqual(obs["error"]["code"], "EPISODE_ENDED")
             self.assertEqual((reward, term, trunc), (0.0, True, False))
         self.assertEqual(env.results[0]["steps"], 1)
+
+    def test_broken_json_submit_is_invalid_not_retried(self):
+        for text in ('{"action": "submit", "findings": {"episode_id": "x", "findings": NaN}}',
+                     '{"action": "submit", "action": "submit", "findings": {}}',
+                     '{"action": "submit", "findings": ' + "1" * 5000 + '}'):
+            env = LocalEnv(mode="train")
+            env.reset(5, "smoke")
+            _, reward, term, trunc, _ = env.step(text)
+            self.assertEqual((reward, term, trunc), (-1.0, True, False), text[:40])
+            self.assertEqual(env.results[0]["inspection_steps"], 0)
+
+    def test_submit_after_time_limit_is_not_an_inspection_step(self):
+        clock = FakeClock()
+        env = LocalEnv(mode="train", time_limit_s=60, clock=clock)
+        env.reset(2, "clean")
+        env.step(act("calculator", expression="1"))
+        clock.now = 61
+        env.step(act("submit", findings={}))
+        self.assertEqual(env.results[0]["inspection_steps"], 1)
 
     def test_eval_terminal_observation_is_identical_for_valid_and_invalid(self):
         outs = []

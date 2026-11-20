@@ -12,6 +12,7 @@ step returns the shared reward to the policy.
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 from fractions import Fraction
@@ -31,6 +32,17 @@ from ..version import VERSIONS
 MAX_STEPS = 100
 ZERO_REWARD = to_float(Fraction(0))   # rewards are floats on the wire
 MODES = ("eval", "train")
+
+
+_SUBMIT_RE = re.compile(r'"action"\s*:\s*"submit"')
+
+
+def _looks_like_submit(action: Any) -> bool:
+    if isinstance(action, dict):
+        return action.get("action") == "submit"
+    if isinstance(action, (bytes, bytearray)):
+        action = bytes(action).decode("utf-8", "replace")
+    return isinstance(action, str) and bool(_SUBMIT_RE.search(action[:4096]))
 
 
 class RunFinalized(RuntimeError):
@@ -145,8 +157,9 @@ class LocalEnv:
                      and self._clock() - self._t0 > self.time_limit_s)
         self._steps += 1
         if timed_out:
+            inspection = self._steps - 1 if _looks_like_submit(action) else self._steps
             return self._terminal(self._envelope(None, None), "time_limit", None,
-                                  self._steps, truncated=True)
+                                  inspection, truncated=True)
 
         parsed = action
         if isinstance(action, (str, bytes, bytearray)):
@@ -154,6 +167,10 @@ class LocalEnv:
                 parsed = loads_untrusted(action)
             except JsonInputError:
                 parsed = None
+                if _looks_like_submit(action):
+                    # a submit whose JSON is broken (NaN, duplicate keys, huge numbers)
+                    # is an invalid structure: the episode ends with -1
+                    parsed = {"action": "submit", "findings": "unparseable"}
         if not isinstance(parsed, dict) or not isinstance(parsed.get("action"), str):
             return self._after_tool(self._envelope(None, "MALFORMED_ACTION"))
 

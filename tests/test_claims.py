@@ -29,6 +29,18 @@ class ClaimsTest(unittest.TestCase):
             self.assertTrue((ROOT / path).exists(), path)
 
 
+class ReportsAreFreshTest(unittest.TestCase):
+    def test_reports_carry_the_current_versions(self):
+        from vouchai.version import ENV_VERSION, GENERATOR_VERSION
+        stamp = f"env {ENV_VERSION}, generator {GENERATOR_VERSION}"
+        for name in ("BASELINES.md", "FAILURE_ANALYSIS.md"):
+            text = (ROOT / "reports" / name).read_text(encoding="utf-8")
+            self.assertIn(stamp, text, f"{name} is stale: run python -m vouchai build-dataset "
+                                       f"and python -m vouchai report")
+        scorecard = (ROOT / "reports" / "SCORECARD.md").read_text(encoding="utf-8")
+        self.assertIn(f"'env_version': '{ENV_VERSION}'", scorecard)
+
+
 def _flatten(suite):
     for item in suite:
         if isinstance(item, unittest.TestSuite):

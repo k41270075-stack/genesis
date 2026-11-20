@@ -408,6 +408,10 @@ def add_cancellations(world: World, stream: Stream, invoices: list[Invoice],
         when = inv.issued_at + timedelta(days=s.randint(4, 8), minutes=s.randint(0, 600))
         if when >= last or near_edge(world, when, BOUNDARY_GUARD_S):
             continue
+        if kind == "copy" and zone_of(world, when) != zone_of(world, inv.issued_at):
+            # a copy cancelled only in the next period is a real misstatement at period
+            # end (IAS 10.9(e)); a legitimate D20 cancels in the same period
+            continue
         target = inv
         if kind == "copy":                     # D20: the copy is cancelled, net zero
             target = Invoice(key=f"{inv.key}c", customer=inv.customer, currency=inv.currency,

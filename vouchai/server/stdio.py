@@ -15,6 +15,7 @@ agent's action and spends a step.
 
 from __future__ import annotations
 
+import re
 import sys
 from typing import Any, BinaryIO
 
@@ -25,7 +26,7 @@ from ..rng import SeedError
 from ..version import VERSIONS
 from .local import MAX_STEPS, LocalEnv, RunFinalized
 
-MAX_LINE_BYTES = 1024 * 1024
+MAX_LINE_BYTES = 16 * 1024 * 1024   # an escaped 1 MB action fits
 
 
 def _read_line(stream: BinaryIO) -> bytes | None:
@@ -105,7 +106,16 @@ def serve(mode: str = "eval", time_limit_s: int | None = 60,
         try:
             request = loads_untrusted(line, max_bytes=MAX_LINE_BYTES)
         except JsonInputError:
-            _write(stdout, {"id": None, "error": {"code": "BAD_REQUEST"}})
+            text = line.decode("utf-8", "replace")
+            if re.search(r'"method"\s*:\s*"step"', text):
+                # the agent's action broke the JSON line: it is still the agent's step
+                action = text if re.search(r'"action"\s*:\s*"submit"', text) else None
+                obs, reward, terminated, truncated, info = env.step(action)
+                _write(stdout, {"id": None, "result": {
+                    "observation": obs, "reward": reward, "terminated": terminated,
+                    "truncated": truncated, "info": info}})
+            else:
+                _write(stdout, {"id": None, "error": {"code": "BAD_REQUEST"}})
             continue
         try:
             response, keep = handle(env, request)

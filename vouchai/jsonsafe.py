@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-MAX_INPUT_BYTES = 256 * 1024
+MAX_INPUT_BYTES = 1024 * 1024
 
 
 class JsonInputError(ValueError):

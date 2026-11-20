@@ -34,11 +34,12 @@ class Issue:
             issue = cls(
                 issue_id=raw["issue_id"],
                 type=raw["type"],
-                affected_ids=tuple(raw["affected_ids"]),
+                affected_ids=tuple(str(x).strip() for x in raw["affected_ids"]),
                 expected_amount_minor=raw["expected_amount_minor"],
-                currency=raw["currency"],
+                currency=str(raw["currency"]).strip().upper(),
                 tolerance_minor=raw["tolerance_minor"],
-                evidence_slots=tuple(tuple(slot) for slot in raw["evidence_slots"]),
+                evidence_slots=tuple(tuple(str(x).strip() for x in slot)
+                                     for slot in raw["evidence_slots"]),
             )
         except (KeyError, TypeError) as exc:
             raise TruthError(f"malformed issue: {exc}") from None

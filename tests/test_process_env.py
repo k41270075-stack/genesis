@@ -87,6 +87,27 @@ class ProcessEnvTest(unittest.TestCase):
         with self.assertRaises(EnvProtocolError):
             env.step({"action": "calculator", "expression": "1"})
 
+    def test_relative_episode_dir(self):
+        import os
+        import tempfile
+        from pathlib import Path
+
+        from vouchai.episode import save_episode
+        ep = generate_episode(52, "smoke")
+        here = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            save_episode(ep, Path(tmp) / "ep")
+            os.chdir(tmp)
+            try:
+                with VouchAIEnv(mode="train") as env:
+                    _, info = env.reset(options={"episode_dir": "ep"})
+                    _, reward, *_ = env.step({"action": "submit",
+                                              "findings": oracle_findings(ep)})
+            finally:
+                os.chdir(here)
+        self.assertEqual(info["episode_id"], ep.episode_id)
+        self.assertEqual(reward, 1.0)
+
     def test_flat_submit_form(self):
         ep = generate_episode(51, "smoke")
         flat = {"action": "submit", **oracle_findings(ep)}

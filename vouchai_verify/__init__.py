@@ -8,4 +8,4 @@ books, and writes the episode passport ("Given / Find / Solution / Answer").
     python -m vouchai_verify EPISODE_DIR --report --passport
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
