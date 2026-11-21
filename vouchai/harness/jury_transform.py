@@ -80,8 +80,12 @@ def collect_ids(public: Path) -> dict[str, list[str]]:
     return {k: sorted(v) for k, v in spaces.items()}
 
 
-def make_mapping(public: Path, seed: int) -> dict[str, str]:
-    """One-to-one map old -> new; new IDs never reuse an old string."""
+def make_mapping(public: Path, seed: int, plain: bool = False) -> dict[str, str]:
+    """One-to-one map old -> new within every ID space; new IDs never reuse an old string.
+
+    plain=True numbers every space from 1 without a prefix, so the same string
+    appears in several spaces (payment "19" and invoice "19"): legal for the jury,
+    because spaces are separate."""
     mapping: dict[str, str] = {}
     stream = Stream.root(seed, "jury-transform")
     for ns, ids in collect_ids(public).items():
@@ -90,7 +94,7 @@ def make_mapping(public: Path, seed: int) -> dict[str, str]:
         for n, old in enumerate(order):
             if old in mapping:
                 raise ValueError(f"ID {old!r} is in two namespaces")
-            mapping[old] = f"{PREFIX[ns]}{n + 1:06d}"
+            mapping[old] = str(n + 1) if plain else f"{PREFIX[ns]}{n + 1:06d}"
     if set(mapping.values()) & set(mapping):
         raise ValueError("new IDs collide with old ones")
     return mapping
@@ -124,7 +128,7 @@ def _rename_json(obj: Any, mapping: dict[str, str], mode: str) -> Any:
 
 
 def jury_transform(src: str | Path, dst: str | Path, *, seed: int, permute: bool,
-                   rename: bool, mode: str = "listed") -> dict[str, str]:
+                   rename: bool, mode: str = "listed", plain: bool = False) -> dict[str, str]:
     """Write the transformed copy and return the old -> new ID map ({} without renaming)."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}")
@@ -132,7 +136,7 @@ def jury_transform(src: str | Path, dst: str | Path, *, seed: int, permute: bool
     if dst.exists():
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
-    mapping = make_mapping(src / "public", seed) if rename else {}
+    mapping = make_mapping(src / "public", seed, plain) if rename else {}
     stream = Stream.root(seed, "jury-permute")
     folders = [dst / "public", dst / "private" / "clean"]
     for folder in folders:

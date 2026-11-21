@@ -1,8 +1,8 @@
 # Эмуляция проверок жюри
 
-Сгенерировано `python -m vouchai judge-selftest` по «Определениям проверок» жюри (20.11.2026). Всё — только через `judge_adapter.py`, как у жюри. Seed фикстур 20261122; режим полный; 168 с.
+Сгенерировано `python -m vouchai judge-selftest` по «Определениям проверок» жюри (20.11.2026). Всё — только через `judge_adapter.py`, как у жюри. Seed фикстур 20261122; режим полный; 132 с.
 
-**Итого: 92/92.**
+**Итого: 96/96.**
 
 ## Блок 1. Контрактные тесты C01–C20 — 20/20
 
@@ -54,7 +54,7 @@
 | D19 | pass | duplicate_invoice/double_posting, payment_allocation/partial |
 | D20 | pass | duplicate_invoice/double_posting, payment_allocation/partial |
 
-## Блок 3. Matcher и награда: 20 тестов + M01–M12 — 32/32
+## Блок 3. Matcher и награда: 20 тестов + M01–M12 — 36/36
 
 | Тест | Итог | Что проверено |
 |---|---|---|
@@ -76,6 +76,8 @@
 | test_18_31_findings | pass | 31 findings: -1, nulls |
 | test_19_eleven_evidence_ids | pass | 11 evidence IDs: -1, nulls |
 | test_20_explanation_1001 | pass | 1001 characters: -1, nulls |
+| test_episode_id_null_or_missing_is_this_episode | pass |  |
+| test_integral_float_steps | pass |  |
 | test_journal_records_the_reason | pass |  |
 | test_m01_repeated_affected_id | pass |  |
 | test_m02_extra_affected_id | pass |  |
@@ -90,6 +92,8 @@
 | test_m11_deterministic_choice | pass |  |
 | test_m12_two_identical_correct | pass |  |
 | test_matching_rule_on_raw_graphs | pass |  |
+| test_shared_string_in_affected_ids | pass |  |
+| test_unknown_truth_shape_fails_loudly | pass |  |
 
 ## Блок 4. Парные проверки P01–P20 — 20/20
 

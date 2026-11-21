@@ -36,7 +36,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from vouchai.env.sandbox import ACTION_FORMATS  # noqa: E402
-from vouchai.episode import _content_id, public_ids, read_tables, save_episode  # noqa: E402
+from vouchai.episode import _truth_issues, public_ids, read_tables, save_episode  # noqa: E402
 from vouchai.episode import generate_episode as _generate  # noqa: E402
 from vouchai.grader import Issue, grade  # noqa: E402
 from vouchai.rng import DEFAULT_KEY  # noqa: E402
@@ -260,13 +260,14 @@ def _load_for_scoring(episode_dir: str) -> tuple[str, list[Issue], set[str]]:
     if truth_path is None:
         raise FileNotFoundError("truth.json not found (private/truth.json or truth.json)")
     truth = json.loads(truth_path.read_text(encoding="utf-8-sig"))
-    raw = truth if isinstance(truth, list) else truth.get("issues", [])
+    raw = _truth_issues(truth)
     truth_id = truth.get("episode_id") if isinstance(truth, dict) else None
     manifest_path = pub / "manifest.json"
     manifest = (json.loads(manifest_path.read_text(encoding="utf-8-sig"))
                 if manifest_path.is_file() else {})
     tables = read_tables(pub, missing_ok=True)
-    episode_id = manifest.get("episode_id") or truth_id or _content_id(tables)
+    # without an explicit ID in the folder the answer's episode_id is not compared
+    episode_id = manifest.get("episode_id") or truth_id
     issues = [Issue.from_json(dict(i, issue_id=i.get("issue_id") or f"issue_{n + 1:02d}"))
               for n, i in enumerate(raw)]
     return episode_id, issues, public_ids(tables)
@@ -279,6 +280,8 @@ def score_episode(episode_dir: str, findings: dict, inspection_steps: int) -> di
     structure: return = -1 and every other field null; the reason goes to the
     grader journal ($VOUCHAI_JUDGE_JOURNAL, default <tmp>/vouchai_judge/journal.jsonl).
     """
+    if isinstance(inspection_steps, float) and inspection_steps.is_integer():
+        inspection_steps = int(inspection_steps)          # 10.0 -> 10; True stays rejected
     if type(inspection_steps) is not int or inspection_steps < 0:
         raise ValueError("inspection_steps must be a non-negative int")
     episode_id, issues, ids = _load_for_scoring(episode_dir)

@@ -77,8 +77,10 @@ class Issue:
             raise TruthError("IDs, type and currency must be strings")
         if self.type not in ISSUE_TYPES:
             raise TruthError(f"unknown issue type {self.type!r}")
-        if not self.affected_ids or len(set(self.affected_ids)) != len(self.affected_ids):
-            raise TruthError("affected_ids must be non-empty and unique")
+        # affected_ids is a set (M01). A repeated string is legal: after a renaming the
+        # payment and the invoice may share it, because ID spaces are separate.
+        if not self.affected_ids:
+            raise TruthError("affected_ids must be non-empty")
         for value in (self.expected_amount_minor, self.tolerance_minor):
             if type(value) is not int or value < 0:
                 raise TruthError("amounts must be non-negative ints")

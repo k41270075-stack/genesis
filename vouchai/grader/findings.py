@@ -88,7 +88,7 @@ def validate(payload: object) -> tuple[list[Finding], list[StructureError]]:
 
     # episode_id is optional (organizers, 21.11): a missing one is not -1 and means
     # "this episode"; a non-string one is a wrong JSON type.
-    if "episode_id" in payload and not isinstance(payload["episode_id"], str):
+    if payload.get("episode_id") is not None and not isinstance(payload["episode_id"], str):
         errors.append(StructureError("WRONG_TYPE", "$.episode_id"))
 
     if "findings" not in payload:
