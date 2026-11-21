@@ -18,7 +18,7 @@ export function Footer() {
     <footer id="check" className="relative border-t border-line">
       <div className="mx-auto grid max-w-[1320px] gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[1fr_1fr]">
         <div>
-          <p className="eyebrow">проверьте сами</p>
+          <p className="eyebrow"><span className="text-stamp">3000</span> — проверьте сами</p>
           <h2 className="h-display mt-4 text-[clamp(32px,4vw,56px)]">Три минуты,<br />одна машина</h2>
           <p className="mt-5 max-w-[480px] text-soft">Контейнер без сети, только для чтения. Те же команды, чей вывод показан на этом сайте.</p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -26,7 +26,7 @@ export function Footer() {
             <a className="btn-ghost" href={`${REPO}#readme`} target="_blank" rel="noreferrer">README: тур для жюри</a>
           </div>
         </div>
-        <div className="term overflow-hidden rounded-2xl border border-line">
+        <div className="term overflow-hidden rounded-lg border border-line">
           <div className="border-b border-line px-4 py-2.5 text-[11px] text-mute">terminal</div>
           <div className="space-y-3 p-4">
             {cmds.map((c, i) => (

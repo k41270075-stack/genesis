@@ -71,12 +71,10 @@ export function Terminal({ run = null, p = 1, live, title, className = "", note 
   }, [lines.length, typed.length]);
 
   return (
-    <div className={`term relative flex min-h-0 flex-col overflow-hidden rounded-2xl border border-line ${className}`}>
+    <div className={`term relative flex min-h-0 flex-col overflow-hidden rounded-lg border border-line ${className}`}>
       <div className="flex items-center gap-2 border-b border-line/80 bg-black/30 px-4 py-2.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-stamp/80" />
-        <span className="h-2.5 w-2.5 rounded-full bg-gold/80" />
-        <span className="h-2.5 w-2.5 rounded-full bg-ok/80" />
-        <span className="ml-2 truncate text-[11px] text-mute">{title ?? "terminal · vouchai"}</span>
+        <span className="text-[11px] text-ok">~/vouchai</span>
+        <span className="truncate text-[11px] text-mute">{title ?? "terminal"}</span>
         <span className="ml-auto hidden shrink-0 text-[10px] uppercase tracking-widest text-mute/70 sm:block">
           {live ? "живой вывод · в браузере" : "запись реального вывода"}
         </span>

@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
+import { PassportButton, PassportDrawer, StampToasts } from "./game/PassportUI";
 import { Hero } from "./hero/Hero";
+import { Game } from "./sections/Game";
 import { Footer } from "./sections/Footer";
 import { Lab } from "./sections/Lab";
 import { REPO } from "./sections/links";
 import { Story } from "./sections/Story";
 import { Tour } from "./sections/Tour";
 
-function Nav({ onTour }: { onTour: () => void }) {
+function Nav({ onTour, onPassport }: { onTour: () => void; onPassport: () => void }) {
   const [solid, setSolid] = useState(false);
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 40);
@@ -23,11 +25,15 @@ function Nav({ onTour }: { onTour: () => void }) {
         </a>
         <div className="ml-auto hidden items-center gap-6 text-[14px] text-soft md:flex">
           <a href="#how" className="hover:text-text">Как устроено</a>
+          <a href="#game" className="hover:text-text">Игра</a>
           <a href="#lab" className="hover:text-text">Тренажёры</a>
           <a href="#check" className="hover:text-text">Проверить</a>
           <button onClick={onTour} className="hover:text-text">Автотур</button>
         </div>
-        <a href={REPO} target="_blank" rel="noreferrer" className="btn-ghost ml-auto !px-4 !py-2 text-[13px] md:ml-0">GitHub</a>
+        <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <PassportButton onOpen={onPassport} />
+          <a href={REPO} target="_blank" rel="noreferrer" className="btn-ghost !px-4 !py-2 text-[13px]">GitHub</a>
+        </div>
       </div>
     </nav>
   );
@@ -38,17 +44,22 @@ export default function App() {
   const video = window.location.hash === "#video";
   const open = useCallback(() => { setTour(true); history.replaceState(null, "", "#tour"); }, []);
   const close = useCallback(() => { setTour(false); history.replaceState(null, "", " "); }, []);
+  const [passport, setPassport] = useState(false);
+  const closePassport = useCallback(() => setPassport(false), []);
   if (video) return <Tour onClose={close} video />;
   return (
     <>
-      <Nav onTour={open} />
+      <Nav onTour={open} onPassport={() => setPassport(true)} />
       <main>
         <Hero onTour={open} />
         <Story />
+        <Game />
         <Lab />
       </main>
       <Footer />
       {tour && <Tour onClose={close} />}
+      <PassportDrawer open={passport} onClose={closePassport} />
+      <StampToasts />
     </>
   );
 }

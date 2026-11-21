@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { readme } from "../data";
 import { easeOut, seg, usePlayback } from "../engine/clock";
+import { earn } from "../game/passport";
 import { MODULES, TOUR } from "../modules/registry";
 import { Stage } from "../ui/Stage";
 import { REPO, SITE } from "./links";
@@ -12,7 +13,7 @@ const INTRO = 3000, OUTRO = 3500;
 
 export function Tour({ onClose, video = false }: { onClose: () => void; video?: boolean }) {
   const total = INTRO + TOUR.reduce((s, x) => s + x.ms, 0) + OUTRO;
-  const pb = usePlayback(total, true);
+  const pb = usePlayback(total, true, () => { if (!video) earn("tour"); });
   const t = pb.t;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); if (e.key === " ") { e.preventDefault(); if (pb.playing) pb.pause(); else pb.play(); } };

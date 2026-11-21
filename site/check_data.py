@@ -14,8 +14,9 @@ SITE = Path(__file__).resolve().parent
 
 
 # written by their own scripts (they run the real commands, minutes long):
-# site/capture_terminal.py -> terminal.json, site/grade_presets.py -> grade_presets.json
-RECORDED = {"terminal.json", "grade_presets.json"}
+# site/capture_terminal.py -> terminal.json, site/grade_presets.py -> grade_presets.json,
+# site/game_cases.py -> game.json
+RECORDED = {"terminal.json", "grade_presets.json", "game.json"}
 
 
 def main() -> int:

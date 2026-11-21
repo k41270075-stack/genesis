@@ -5,6 +5,7 @@ import { signed } from "../lib/format";
 import { useKit } from "../lib/kit";
 import { MAX_ACTIONS, Sandbox as Env, TABLES, type Action, type Row, type StepResult } from "../lib/sandbox";
 import { tablesOf } from "../lib/episode";
+import { earn } from "../game/passport";
 import { Label } from "./parts";
 import type { VizProps } from "./types";
 
@@ -64,6 +65,7 @@ export default function Sandbox({ setLive }: VizProps) {
       const g = kit.grade(findings === "auditor" ? kit.auditorFindings : [], env.inspection);
       const s = `TP ${g.tp} · FP ${g.fp} · FN ${g.fn} · inspection_steps ${env.inspection} → награда ${signed(g.reward, 3)}`;
       setScore(s);
+      earn("m:sandbox");
       lines.push(`# оценщик: ${s}`);
     }
     setLog((l) => [...l, ...lines].slice(-80));

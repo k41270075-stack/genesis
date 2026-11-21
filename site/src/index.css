@@ -18,18 +18,20 @@
 }
 
 @layer components {
-  .eyebrow { @apply font-mono text-[12px] uppercase tracking-[0.22em] text-mute; }
-  .h-display { @apply font-display font-semibold tracking-[-0.03em] leading-[0.95]; }
+  /* section marks look like ledger accounts: "1200 — как устроено" */
+  .eyebrow { @apply font-mono text-[12.5px] text-mute; }
+  .h-display { @apply font-display font-bold tracking-[-0.015em] leading-[1.02]; }
   .card {
     @apply rounded-2xl border border-line bg-ink/80 backdrop-blur-sm;
   }
   .btn {
-    @apply inline-flex items-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold transition
+    @apply inline-flex items-center gap-2 rounded px-5 py-3 text-[15px] font-semibold transition
       duration-200 select-none;
   }
-  .btn-red { @apply btn bg-stamp text-white hover:brightness-110 active:scale-[.97]; box-shadow: 0 10px 40px -10px rgba(255,77,61,.8); }
-  .btn-ghost { @apply btn border border-line2 text-text hover:border-soft hover:bg-white/5 active:scale-[.97]; }
-  .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 font-mono text-[11px] text-soft; }
+  .btn-red { @apply btn bg-stamp text-white hover:bg-[#ff6352] active:translate-y-px; }
+  .btn-ghost { @apply btn border border-line2 text-text hover:border-soft hover:bg-white/5 active:translate-y-px; }
+  .rule-dots { background-image: radial-gradient(circle, #4a5470 1px, transparent 1.3px); background-size: 6px 6px; background-repeat: repeat-x; background-position: 0 75%; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-sm border border-line px-2 py-0.5 font-mono text-[11px] text-soft; }
   .kbd { @apply rounded-md border border-line2 bg-panel px-1.5 py-0.5 font-mono text-[12px] text-soft; }
 
   /* thermal receipt paper with a torn bottom edge */

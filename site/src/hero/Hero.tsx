@@ -99,11 +99,11 @@ export function Hero({ onTour }: { onTour: () => void }) {
     try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; }
   });
   const stats = [
-    facts.selftest && { v: facts.selftest.ok, s: `/${facts.selftest.all}`, k: "проверок жюри пройдено в нашей эмуляции" },
-    facts.recipes && { v: facts.recipes.ok, s: `/${facts.recipes.all}`, k: "закрытых сценариев D01–D20 собрано и сверено" },
-    facts.attacks && { v: facts.attacks, s: "", k: `атак на награду — ни одна не выше F1 ${facts.bestF1?.replace(".", ",")}` },
-    facts.graphs && { v: facts.graphs, s: "", k: "графов: matcher сверен полным перебором" },
-  ].filter(Boolean) as { v: number; s: string; k: string }[];
+    facts.selftest && { v: facts.selftest.ok, s: `/${facts.selftest.all}`, k: "проверки жюри, наша эмуляция", f: "reports/JURY_SELFTEST.md" },
+    facts.recipes && { v: facts.recipes.ok, s: `/${facts.recipes.all}`, k: "эпизоды D01–D20 × 40 seed", f: "reports/RECIPES.md" },
+    facts.attacks && { v: facts.attacks, s: "", k: `атаки на награду, лучшая F1 ${facts.bestF1?.replace(".", ",")}`, f: "reports/ATTACK_SEARCH.md" },
+    facts.graphs && { v: facts.graphs, s: "", k: "графы matcher против перебора", f: "tests/test_matcher_exhaustive.py" },
+  ].filter(Boolean) as { v: number; s: string; k: string; f: string }[];
 
   return (
     <section id="top" className="relative flex min-h-[100svh] flex-col overflow-hidden">
@@ -120,11 +120,8 @@ export function Hero({ onTour }: { onTour: () => void }) {
         transition={{ delay: IMPACT, duration: 0.45 }}>
         <div className="grid flex-1 items-center gap-12 lg:grid-cols-[1fr_auto]">
           <div>
-            <motion.p className="eyebrow mb-6 flex flex-wrap items-center gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-stamp/40 bg-stamp/10 px-3 py-1 text-stamp">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-stamp" /> RL-среда · FinTech
-              </span>
-              Genesis Hackathon 2026
+            <motion.p className="eyebrow mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+              <span className="text-stamp">RL-среда</span> для ИИ-аудиторов · Genesis Hackathon 2026, кейс FinTech
             </motion.p>
             <h1 className="h-display text-[clamp(40px,5.8vw,92px)]">
               <Words text="Каждый вывод" delay={0.25} /><br />
@@ -146,21 +143,22 @@ export function Hero({ onTour }: { onTour: () => void }) {
                 <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor" /></svg>
                 Автотур · 60 секунд
               </button>
-              <a className="btn-ghost" href="#lab">Открыть 12 тренажёров ↓</a>
+              <a className="btn-ghost" href="#game">Сыграть: ошибка или двойник? ↓</a>
             </motion.div>
           </div>
           <div className="mx-auto lg:mr-6 lg:scale-[1.12] lg:origin-right"><Receipt /></div>
         </div>
 
-        <motion.div className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-4"
+        <motion.div className="mt-10 max-w-[760px] font-mono text-[13px]"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: IMPACT + 0.15, duration: 0.4 }}>
           {stats.map((s, i) => (
-            <motion.div key={i} className="bg-void/85 px-5 py-5 backdrop-blur" initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }} transition={{ delay: IMPACT + 0.25 + i * 0.1 }}>
-              <div className="h-display tabnum text-[clamp(28px,3.4vw,46px)]">
-                <Counter to={s.v} delay={IMPACT + 0.3 + i * 0.1} /><span className="text-mute">{s.s}</span>
-              </div>
-              <div className="mt-2 text-[13px] leading-snug text-mute">{s.k}</div>
+            <motion.div key={i} className="flex items-baseline gap-3 border-b border-line/70 py-2" initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }} transition={{ delay: IMPACT + 0.25 + i * 0.1 }}>
+              <span className="shrink-0 text-soft">{s.k}</span>
+              <span className="rule-dots h-3 flex-1" />
+              <span className="tabnum shrink-0 text-[15px] font-bold text-text"><Counter to={s.v} delay={IMPACT + 0.3 + i * 0.1} /><span className="text-mute">{s.s}</span></span>
+              <a href={`https://github.com/k41270075-stack/vouchai/blob/main/${s.f}`} target="_blank" rel="noreferrer"
+                className="hidden w-[190px] shrink-0 truncate text-right text-[11.5px] text-mute hover:text-sky sm:block">{s.f}</a>
             </motion.div>
           ))}
         </motion.div>

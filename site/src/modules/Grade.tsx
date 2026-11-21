@@ -8,6 +8,7 @@ import { REASON_RU, STRUCT_RU, TYPE_RU, useKit, type Kit } from "../lib/kit";
 import type { FindingIn, GradeResult } from "../lib/matcher";
 import { runOf } from "../terminal";
 import { lineAt } from "../ui/Terminal";
+import { earn } from "../game/passport";
 import { Gauge, Label } from "./parts";
 import type { VizProps } from "./types";
 
@@ -97,6 +98,8 @@ export default function Grade({ p, auto, setLive, run, lines }: VizProps) {
     return { r: kit.grade(JSON.stringify(preset.payload), preset.steps), findings: preset.payload.findings };
   }, [kit, preset, custom, auto]);
 
+  useEffect(() => { if (!auto && local.p >= 1) earn("m:grade"); }, [auto, local.p]);
+  useEffect(() => { if (!auto && custom !== null && custom !== JSON.stringify(preset.payload, null, 1)) earn("custom"); }, [auto, custom, preset]);
   useEffect(() => {
     if (!setLive || !result) return;
     if (custom !== null) {

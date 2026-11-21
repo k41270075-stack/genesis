@@ -25,10 +25,11 @@ export default {
   theme: {
     colors: { transparent: "transparent", current: "currentColor", black: "#000", white: "#fff", ...palette },
     fontFamily: {
-      display: ['"Unbounded Variable"', "system-ui", "sans-serif"],
+      display: ['"PT Serif"', "Georgia", "serif"],
       sans: ['"Manrope Variable"', "system-ui", "sans-serif"],
       mono: ['"JetBrains Mono Variable"', "ui-monospace", "Consolas", "monospace"],
     },
+    borderRadius: { none: "0", sm: "2px", DEFAULT: "4px", md: "5px", lg: "6px", xl: "8px", "2xl": "10px", "3xl": "12px", full: "9999px" },
     extend: {
       boxShadow: {
         glow: "0 0 0 1px rgba(255,77,61,.35), 0 0 40px -8px rgba(255,77,61,.55)",

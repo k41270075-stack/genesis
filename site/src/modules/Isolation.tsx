@@ -56,9 +56,9 @@ export default function Isolation({ p, run, lines }: VizProps) {
         <Label>зона B · отдельный процесс</Label>
         <div className="mt-1 text-[13px] text-soft">генератор, эталон и оценщик; JSON-строки по stdio</div>
         <div className="mt-4 grid flex-1 content-center gap-2">
-          {[["эталон (truth)", "🔒"], ["оценщик", "⚖"], ["генератор", "⚙"]].map(([a, b]) => (
-            <div key={a} className="flex items-center gap-3 rounded-xl border border-line bg-void/60 px-3 py-2.5">
-              <span className="text-[18px]">{b}</span><span className="text-[13px]">{a}</span>
+          {[["эталон", "truth.json · ответы"], ["оценщик", "matcher · награда"], ["генератор", "seed → эпизод"]].map(([a, b]) => (
+            <div key={a} className="flex items-baseline justify-between gap-3 border-b border-line px-1 py-2.5">
+              <span className="text-[13px]">{a}</span><span className="font-mono text-[11px] text-mute">{b}</span>
             </div>
           ))}
           <div className="mt-2 rounded-xl border border-dashed border-line2 p-3 font-mono text-[11px] text-soft">
