@@ -3,14 +3,19 @@
 import { reports } from "../data";
 import { easeOut, seg } from "../engine/clock";
 import { facts, TYPE_RU } from "../lib/kit";
+import { lineAt } from "../ui/Terminal";
 import { Label, StampMark } from "./parts";
 import type { VizProps } from "./types";
 
 export default function Recipes({ p, lines, run }: VizProps) {
   const rows = reports.RECIPES?.sections?.[0]?.tables?.[0]?.rows ?? [];
   const seeds = Number(/\/(\d+)/.exec(rows[0]?.[rows[0].length - 1] ?? "")?.[1] ?? 40);
-  const sweep = easeOut(seg(p, 0.12, 0.85));
   const all = (run?.lines ?? []).map((l) => l[1]);
+  const firstRow = all.findIndex((s) => /^\|\s*D\d\d\s*\|/.test(s));
+  const pStart = firstRow >= 0 ? lineAt(run, firstRow) - 0.02 : 0.12;
+  const sweep = easeOut(seg(p, pStart, 0.86));
+  const waiting = p < pStart;
+  const secs = run ? Math.round((run.ms / 1000) * Math.min(1, seg(p, 0.1, pStart))) : 0;
   const liveRows = all.slice(0, lines).filter((s) => /^\|\s*D\d\d\s*\|/.test(s)).length;
   const cells = Math.round(sweep * rows.length * seeds);
   const kind = (r: string[]) => {
@@ -25,7 +30,9 @@ export default function Recipes({ p, lines, run }: VizProps) {
           <Label>{rows.length} сценариев × {seeds} seed</Label>
           <div className="h-display tabnum mt-1 text-[44px] leading-none">{cells}<span className="text-mute">/{rows.length * seeds}</span></div>
         </div>
-        <div className="text-right text-[12px] text-mute">каждый эпизод: собран → проверен<br />vouchai_verify → oracle = 1,0</div>
+        <div className="text-right text-[12px] text-mute">
+          {waiting ? <span className="font-mono text-gold">● сборка эпизодов · {secs} с</span> : <>каждый эпизод: собран → проверен<br />vouchai_verify → oracle = 1,0</>}
+        </div>
       </div>
       <div className="flex-1 space-y-[3px] overflow-hidden">
         {rows.map((r, i) => {

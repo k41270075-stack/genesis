@@ -10,7 +10,8 @@ const FAST_MS = 3000;
 const at = (run: Run, i: number): number => {
   const n = run.lines.length;
   if (run.ms < FAST_MS) return (i + 1) / n;
-  return 0.5 * Math.min(1, run.lines[i]![0] / Math.max(1, run.ms)) + 0.5 * ((i + 1) / n);
+  // a quarter real time (the long silence while a command works stays visible), three quarters line order
+  return 0.25 * Math.min(1, run.lines[i]![0] / Math.max(1, run.ms)) + 0.75 * ((i + 1) / n);
 };
 
 /** How many output lines of `run` are visible at progress p (shared with the pictures). */
