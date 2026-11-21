@@ -70,12 +70,12 @@ export function tablesOf(ep: EpisodeData): Tables {
   return t;
 }
 
-/** Every ID that exists in the public tables (row, doc, business, entity and fx IDs). */
+/** Every ID the tools can fetch (row, doc, business and fx IDs; not entity IDs). */
 export function publicIds(t: Tables): Set<string> {
   const ids = new Set<string>();
   const add = (v: unknown) => { if (typeof v === "string" && v) ids.add(v); };
-  t.ledger.forEach((r) => { add(r.row_id); add(r.entity_id); add(r.invoice_id); add(r.payment_id); });
-  t.invoices.forEach((r) => { add(r.doc_id); add(r.invoice_id); add(r.entity_id); });
+  t.ledger.forEach((r) => { add(r.row_id); add(r.invoice_id); add(r.payment_id); });
+  t.invoices.forEach((r) => { add(r.doc_id); add(r.invoice_id); });
   t.payments.forEach((r) => { add(r.doc_id); add(r.payment_id); });
   t.fx.forEach((r) => add(r.id));
   return ids;

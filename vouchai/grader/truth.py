@@ -45,6 +45,17 @@ class Issue:
             sets = [tuple(st) for st in raw.get("evidence_sets") or []]
             minimal = tuple(raw.get("evidence_ids") or ())
             slots = raw.get("evidence_slots")
+            if minimal:
+                # The optional alternatives must agree with evidence_ids. A paired
+                # check that renames only evidence_ids (the field the task names)
+                # leaves them pointing at old IDs, possibly other records now: then
+                # they are dropped and the minimal set alone is admissible.
+                m = set(minimal)
+                if slots and not (m <= {x for slot in slots for x in slot}
+                                  and all(m.intersection(slot) for slot in slots)):
+                    slots = None
+                if sets and not m <= {x for st in sets for x in st}:
+                    sets = []
             if not slots:
                 first = minimal or (sets[0] if sets else ())
                 slots = [[x] for x in first]

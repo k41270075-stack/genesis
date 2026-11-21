@@ -91,7 +91,9 @@ class LocalEnv:
             raise ValueError("options.spent_ms must be a non-negative int")
         try:
             if options.get("episode_dir"):
-                episode = load_episode(options["episode_dir"])
+                # closed mode (no_truth): the truth is not even read into this process
+                episode = load_episode(options["episode_dir"],
+                                       with_truth=not options.get("no_truth"))
                 if not episode.provenance.get("truth_found") and not options.get("no_truth"):
                     raise ValueError("no truth.json in the episode folder (private/truth.json "
                                      "or truth.json); pass options={'no_truth': True} to "

@@ -4,7 +4,7 @@
 
 | Что | Где зафиксировано | Значение |
 |---|---|---|
-| Код | git-тег сдачи | `v1.3.0` (`python -m vouchai version`) |
+| Код | git-тег сдачи | `v1.3.1` (версии среды и генератора — 1.3.0, `python -m vouchai version`) |
 | Версии среды | `vouchai/version.py`, в каждом `manifest.json` и `provenance.json` | `env_version`, `generator_version`, `schema_version`, `config_version`, `reward_version` |
 | Python | `Dockerfile`, CI | образ — 3.11; CI — 3.10, 3.11, 3.12 (Linux) и 3.11 (Windows, путь с кириллицей и пробелами) |
 | Базовый образ | `Dockerfile` | `python:3.11-slim` по multi-arch digest `sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535` |

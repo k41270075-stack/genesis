@@ -15,6 +15,7 @@ agent's action and spends a step.
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from typing import Any, BinaryIO
@@ -60,8 +61,11 @@ def handle(env: LocalEnv, request: Any) -> tuple[dict[str, Any], bool]:
         return {"id": rid, "error": {"code": "BAD_REQUEST"}}, True
 
     if method == "hello":
+        # which root key builds episodes: a closed run needs "secret"
+        root_key = "secret" if os.environ.get("VOUCHAI_KEY") else "public"
         return {"id": rid, "result": {**VERSIONS, "mode": env.mode, "max_steps": MAX_STEPS,
-                                      "limits": env.limits(), "hardening": HARDENING}}, True
+                                      "limits": env.limits(), "hardening": HARDENING,
+                                      "root_key": root_key}}, True
     if method == "reset":
         try:
             obs, info = env.reset(params.get("seed"), params.get("config"), params.get("options"))

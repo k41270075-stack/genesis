@@ -183,9 +183,17 @@ interface Issue {
 }
 
 function normalizeIssue(raw: TruthIssue): Issue {
-  const sets = (raw.evidence_sets ?? []).filter((s) => s.length > 0);
+  let sets = (raw.evidence_sets ?? []).filter((s) => s.length > 0);
   const minimal = raw.evidence_ids ?? [];
   let slots = raw.evidence_slots ?? [];
+  if (minimal.length) {
+    // optional alternatives must agree with evidence_ids (stale after a renaming)
+    const m = new Set(minimal);
+    const slotIds = new Set(slots.flat());
+    if (slots.length && !(minimal.every((x) => slotIds.has(x)) && slots.every((s) => s.some((x) => m.has(x))))) slots = [];
+    const setIds = new Set(sets.flat());
+    if (sets.length && !minimal.every((x) => setIds.has(x))) sets = [];
+  }
   if (!slots.length) slots = (minimal.length ? minimal : sets[0] ?? []).map((x) => [x]);
   return {
     issue_id: raw.issue_id, type: raw.type, affected_ids: [...raw.affected_ids],

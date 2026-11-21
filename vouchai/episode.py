@@ -332,10 +332,13 @@ def _ids_as_text(row: dict) -> dict:
 
 
 def public_ids(tables: dict[str, list[dict[str, Any]]]) -> set[str]:
-    """IDs of the four public tables: row, document, business, entity and fx IDs."""
+    """IDs a policy can fetch with the tools (get_record / get_document): row,
+    document, business (invoice_id, payment_id) and fx IDs. An entity_id is a value
+    inside records, not a record: no tool returns it, so it is not citable evidence
+    (rule 3: a non-existent or inaccessible evidence ID makes the finding a FP)."""
     ids: set[str] = set()
-    fields = {"ledger": ("row_id", "entity_id", "invoice_id", "payment_id"),
-              "invoices": ("doc_id", "invoice_id", "entity_id"),
+    fields = {"ledger": ("row_id", "invoice_id", "payment_id"),
+              "invoices": ("doc_id", "invoice_id"),
               "payments": ("doc_id", "payment_id"),
               "fx": ("id",)}
     for table, names in fields.items():
