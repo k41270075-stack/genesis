@@ -1,7 +1,7 @@
 // «Ошибка или двойник?»: twelve cases from the open dev episode (site/game_cases.py).
 // The visitor is the agent: accuse or let pass; the result is graded by the case's formula.
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gameJson from "../../data/game.json";
 import presetsJson from "../../data/grade_presets.json";
 import { hash01 } from "../engine/clock";
@@ -14,6 +14,10 @@ interface Case { kind: "error" | "twin"; type: string; claim: string; cards: Car
 const GAME = gameJson as unknown as { episode_id: string; company: string; cases: Case[] };
 const PRESETS = (presetsJson as { presets: { key: string; steps: number; python: { return: number } }[] }).presets;
 const LIMIT_MS = 20000;
+const AuditDesk = lazy(() => import("../game/AuditDesk"));
+const hasWebGL = (() => {
+  try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { return false; }
+})();
 
 type Verdict = "accuse" | "pass";
 
@@ -132,13 +136,21 @@ export function Game() {
 
         <div className="mt-12 rounded-lg border border-line bg-ink">
           {phase === "intro" && (
-            <div className="grid gap-8 p-8 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="grid gap-8 p-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+              {hasWebGL && (
+                <div className="h-[340px] overflow-hidden rounded-md border border-line">
+                  <Suspense fallback={null}><AuditDesk caseIndex={-1} act={null} right={null} left={cases.length} /></Suspense>
+                </div>
+              )}
+              <div>
+              <p className="mb-4 font-display text-[22px] font-bold leading-snug">Ревизор ждёт документы. Вы решаете — он ставит штамп.</p>
               <div className="space-y-2 text-[15px] text-soft">
                 <div><span className="kbd">1</span> или <span className="kbd">←</span> — «ошибка, обвиняю»</div>
                 <div><span className="kbd">2</span> или <span className="kbd">→</span> — «законно, пропускаю»</div>
                 <div><span className="kbd">Enter</span> — следующий случай · на решение {LIMIT_MS / 1000} секунд</div>
               </div>
-              <button className="btn-red text-[16px]" onClick={start}>Начать ревизию</button>
+              <button className="btn-red mt-6 text-[16px]" onClick={start}>Начать ревизию</button>
+              </div>
             </div>
           )}
 
@@ -152,9 +164,17 @@ export function Game() {
                   <div className="h-full" style={{ width: `${(left / LIMIT_MS) * 100}%`, background: left < 5000 ? "#FF4D3D" : "#5B8CFF" }} />
                 </div>
               </div>
-              <motion.div animate={shake}>
-                <h3 className="mt-5 font-display text-[clamp(22px,2.4vw,32px)] font-bold leading-tight">{cur.claim}</h3>
-                <div className="relative mt-7 flex min-h-[230px] flex-wrap items-start justify-center gap-5" key={`${attempt}-${k}`}>
+              <motion.div animate={shake} className={hasWebGL ? "mt-5 grid gap-6 lg:grid-cols-[1fr_1.05fr]" : ""}>
+                {hasWebGL && (
+                  <div className="h-[300px] overflow-hidden rounded-md border border-line lg:h-[420px]">
+                    <Suspense fallback={null}>
+                      <AuditDesk caseIndex={k + attempt * 100} act={shown} right={right} left={cases.length - k - 1} />
+                    </Suspense>
+                  </div>
+                )}
+                <div>
+                <h3 className="font-display text-[clamp(22px,2.4vw,30px)] font-bold leading-tight">{cur.claim}</h3>
+                <div className="relative mt-6 flex min-h-[230px] flex-wrap items-start justify-center gap-4" key={`${attempt}-${k}`}>
                   {cur.cards.map((c, i) => <Doc key={i} card={c} i={i} />)}
                   <AnimatePresence>
                     {shown && (
@@ -168,6 +188,7 @@ export function Game() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </div>
                 </div>
               </motion.div>
               <div className="mt-8 border-t border-line pt-6">
