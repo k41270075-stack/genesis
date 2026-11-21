@@ -1,68 +1,54 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { fx, FxLayer } from "./game/fx";
-import { LevelShell } from "./game/LevelShell";
-import { LEVELS } from "./game/levels";
-import { useGame } from "./game/store";
-import { Title } from "./game/Title";
-import { WorldMap } from "./game/WorldMap";
+import { useCallback, useEffect, useState } from "react";
+import { Hero } from "./hero/Hero";
+import { Footer } from "./sections/Footer";
+import { Lab } from "./sections/Lab";
+import { REPO } from "./sections/links";
+import { Story } from "./sections/Story";
+import { Tour } from "./sections/Tour";
 
-type Scene = { kind: "title" } | { kind: "map" } | { kind: "level"; index: number };
-
-function sceneFromHash(): Scene {
-  const m = /^#(\d+)$/.exec(window.location.hash);
-  if (m) {
-    const i = Number(m[1]) - 1;
-    if (i >= 0 && i < LEVELS.length) return { kind: "level", index: i };
-  }
-  if (window.location.hash === "#map") return { kind: "map" };
-  return { kind: "title" };
+function Nav({ onTour }: { onTour: () => void }) {
+  const [solid, setSolid] = useState(false);
+  useEffect(() => {
+    const on = () => setSolid(window.scrollY > 40);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+  return (
+    <nav className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${solid ? "border-b border-line bg-void/80 backdrop-blur-md" : ""}`}>
+      <div className="mx-auto flex max-w-[1320px] items-center gap-6 px-5 py-4 sm:px-8">
+        <a href="#top" className="flex items-center gap-2.5">
+          <img src="./favicon.svg" alt="" className="h-7 w-7" />
+          <span className="font-display text-[17px] font-semibold">Vouch<span className="text-stamp">AI</span></span>
+        </a>
+        <div className="ml-auto hidden items-center gap-6 text-[14px] text-soft md:flex">
+          <a href="#how" className="hover:text-text">Как устроено</a>
+          <a href="#lab" className="hover:text-text">Тренажёры</a>
+          <a href="#check" className="hover:text-text">Проверить</a>
+          <button onClick={onTour} className="hover:text-text">Автотур</button>
+        </div>
+        <a href={REPO} target="_blank" rel="noreferrer" className="btn-ghost ml-auto !px-4 !py-2 text-[13px] md:ml-0">GitHub</a>
+      </div>
+    </nav>
+  );
 }
 
 export default function App() {
-  const { calm } = useGame();
-  const [scene, setScene] = useState<Scene>(sceneFromHash);
-  const [selected, setSelected] = useState(() => {
-    const s = sceneFromHash();
-    return s.kind === "level" ? s.index : 0;
-  });
-  const stage = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { fx.setStage(stage.current); }, []);
-  useEffect(() => {
-    const onHash = () => {
-      const s = sceneFromHash();
-      setScene(s);
-      if (s.kind === "level") setSelected(s.index);
-    };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-  useEffect(() => {
-    const hash = scene.kind === "level" ? `#${scene.index + 1}` : scene.kind === "map" ? "#map" : "";
-    if (window.location.hash !== hash) window.history.replaceState(null, "", hash || window.location.pathname);
-  }, [scene]);
-
-  const toMap = useCallback(() => setScene({ kind: "map" }), []);
-  const enter = useCallback((i: number) => { setSelected(i); setScene({ kind: "level", index: i }); }, []);
-  const next = useCallback(() => {
-    setScene((s) => {
-      if (s.kind !== "level") return s;
-      const n = s.index + 1;
-      if (n >= LEVELS.length) return { kind: "map" };
-      setSelected(n);
-      return { kind: "level", index: n };
-    });
-  }, []);
-
+  const [tour, setTour] = useState(() => /^#(tour|video)$/.test(window.location.hash));
+  const video = window.location.hash === "#video";
+  const open = useCallback(() => { setTour(true); history.replaceState(null, "", "#tour"); }, []);
+  const close = useCallback(() => { setTour(false); history.replaceState(null, "", " "); }, []);
+  if (video) return <Tour onClose={close} video />;
   return (
-    <div ref={stage} className={calm ? "" : "crt"}>
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[70] px-btn">К содержимому</a>
-      <div id="main-content">
-        {scene.kind === "title" && <Title onPlay={toMap} />}
-        {scene.kind === "map" && <WorldMap selected={selected} onSelect={setSelected} onEnter={enter} />}
-        {scene.kind === "level" && <LevelShell key={scene.index} index={scene.index} onMap={toMap} onNext={next} />}
-      </div>
-      <FxLayer />
-    </div>
+    <>
+      <Nav onTour={open} />
+      <main>
+        <Hero onTour={open} />
+        <Story />
+        <Lab />
+      </main>
+      <Footer />
+      {tour && <Tour onClose={close} />}
+    </>
   );
 }

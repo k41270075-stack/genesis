@@ -13,6 +13,11 @@ from pathlib import Path
 SITE = Path(__file__).resolve().parent
 
 
+# written by their own scripts (they run the real commands, minutes long):
+# site/capture_terminal.py -> terminal.json, site/grade_presets.py -> grade_presets.json
+RECORDED = {"terminal.json", "grade_presets.json"}
+
+
 def main() -> int:
     current = SITE / "data"
     with tempfile.TemporaryDirectory() as tmp:
@@ -29,7 +34,8 @@ def main() -> int:
         if name not in have:
             problems.append(f"missing  site/data/{name}")
         elif name not in fresh:
-            problems.append(f"extra    site/data/{name}")
+            if name not in RECORDED:
+                problems.append(f"extra    site/data/{name}")
         elif fresh[name] != have[name]:
             problems.append(f"stale    site/data/{name}")
     if problems:

@@ -1,40 +1,39 @@
 import type { Config } from "tailwindcss";
 
-// The 16-colour palette of the game (tokens; used as bg-*, text-*, border-*).
+// «Forensic noir»: a dark audit lab, thermal-receipt paper and one red stamp.
 export const palette = {
-  night: "#120F1C",   // background
-  deep: "#1E1A30",    // panels
-  slate: "#2F2A4A",   // panel borders, tiles
-  dusk: "#4B4475",    // inactive
-  fog: "#9A93C0",     // muted text (AA on night)
-  paper: "#EFE9D6",   // main text, receipts
-  white: "#FFF8E6",
-  stamp: "#D9473A",   // stamp red / FP
-  ember: "#FF7A5C",   // explosions
-  carbon: "#4E79E8",  // carbon blue / info
-  sky: "#8FB2FF",
-  leaf: "#3FAE5A",    // TP
-  lime: "#A8E37A",
-  gold: "#F4C64E",    // stars, coins
-  amber: "#E8892E",
-  wood: "#7B4B2D",
+  void: "#05060A",     // page background
+  ink: "#0B0D13",      // panels
+  panel: "#10131B",    // raised panels
+  line: "#1D2231",     // hairlines
+  line2: "#2A3145",    // borders on hover
+  mute: "#8B93A7",     // secondary text (AA on void)
+  soft: "#B9C0D0",
+  text: "#ECEAE4",     // main text
+  paper: "#F4EFE3",    // receipts
+  paperInk: "#1A1712",
+  stamp: "#FF4D3D",    // stamp red, FP, errors
+  ember: "#FF8A5B",
+  blue: "#5B8CFF",     // twins, information
+  sky: "#9DB8FF",
+  ok: "#3DDC97",       // TP, pass
+  gold: "#FFC34D",
 } as const;
 
 export default {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: { relative: true, files: ["./index.html", "./src/**/*.{ts,tsx}"] },
   theme: {
-    colors: { transparent: "transparent", current: "currentColor", ...palette },
+    colors: { transparent: "transparent", current: "currentColor", black: "#000", white: "#fff", ...palette },
     fontFamily: {
-      // Press Start 2P: titles, buttons, big numbers (full Cyrillic; PT Mono covers the minus sign)
-      arcade: ['"Press Start 2P"', '"PT Mono"', "monospace"],
-      // PT Mono: every running text, table and label (clear Cyrillic)
-      mono: ['"PT Mono"', "ui-monospace", "monospace"],
+      display: ['"Unbounded Variable"', "system-ui", "sans-serif"],
+      sans: ['"Manrope Variable"', "system-ui", "sans-serif"],
+      mono: ['"JetBrains Mono Variable"', "ui-monospace", "Consolas", "monospace"],
     },
     extend: {
       boxShadow: {
-        px: "4px 4px 0 0 #000",
-        pxs: "2px 2px 0 0 #000",
-        inset: "inset 0 -4px 0 0 rgba(0,0,0,.35)",
+        glow: "0 0 0 1px rgba(255,77,61,.35), 0 0 40px -8px rgba(255,77,61,.55)",
+        glowb: "0 0 0 1px rgba(91,140,255,.35), 0 0 40px -8px rgba(91,140,255,.5)",
+        card: "0 30px 80px -30px rgba(0,0,0,.8)",
       },
     },
   },

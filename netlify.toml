@@ -1,4 +1,4 @@
-# The site of VouchAI (the game «Ревизор»): Vite + React + TypeScript in site/.
+# The site of VouchAI (13 trainers: every command next to its recorded output): Vite + React + TypeScript in site/.
 # Data are built from the repository by `python site/build_data.py` and committed
 # in site/data; the Netlify build only bundles them (no Python needed there).
 [build]
@@ -23,8 +23,3 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/fonts/*"
-  [headers.values]
-    Cache-Control = "public, max-age=2592000"
