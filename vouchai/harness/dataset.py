@@ -87,7 +87,8 @@ def baselines_md(summaries: dict[str, dict[str, Any]]) -> str:
         f"Versions: env {VERSIONS['env_version']}, generator {VERSIONS['generator_version']}, "
         f"reward {VERSIONS['reward_version']}.",
         "",
-        "| Policy | TP | FP | FN | P | R | F1 | mean return | mean steps | s / episode |",
+        "| Policy | TP | FP | FN | P | R | F1 | mean return | mean steps (submit included) "
+        "| s / episode |",
         "|---|---|---|---|---|---|---|---|---|---|",
     ]
     order = ["oracle", "vouchai_auditor", "simple_reconciler", "random_explorer",

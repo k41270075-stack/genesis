@@ -131,3 +131,6 @@ class World:
     rounding: str
     customers: list[Customer]
     fx: FxGrid
+    # Diagnostics only: cap of the D23 lead before the document (None = the real
+    # distribution). Re-creates the behaviour before 1.2.0 for the failure analysis.
+    d23_max_lead_s: int | None = None

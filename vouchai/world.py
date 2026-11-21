@@ -113,7 +113,8 @@ def build_world(cfg: dict[str, Any], stream: Stream) -> World:
                  period_start=period_start, period_end=period_end,
                  window_start=window_start, window_end=window_end,
                  rate_rule=cfg["policy"]["fx_rate_date"], max_lookback_days=MAX_LOOKBACK_DAYS,
-                 rounding=cfg["policy"]["rounding"], customers=customers, fx=fx)
+                 rounding=cfg["policy"]["rounding"], customers=customers, fx=fx,
+                 d23_max_lead_s=cfg["distractors"].get("d23_max_lead_s"))
 
 
 def rate_date(world: World, source: str, local_day: date, rule: str | None = None) -> date | None:

@@ -72,7 +72,8 @@
     "distractors": {
       "density": "3/10",
       "phantom_targets": true,
-      "require": []
+      "require": [],
+      "d23_max_lead_s": null
     },
     "placement": "lenient",
     "render": {

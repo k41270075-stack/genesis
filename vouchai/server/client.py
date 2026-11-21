@@ -38,15 +38,21 @@ class ProcessEnv:
             [str(PACKAGE_ROOT)] + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else []))
         env["PYTHONHASHSEED"] = "0"
         env["PYTHONUTF8"] = "1"
-        log_root = Path(log_dir) if log_dir else Path(tempfile.gettempdir())
-        log_root.mkdir(parents=True, exist_ok=True)
-        # stderr goes to a file: a full stderr pipe would deadlock the child.
-        self._stderr = tempfile.NamedTemporaryFile(prefix="vouchai-zone-b-", suffix=".log",
-                                                   dir=log_root, delete=False)
+        # stderr goes to a file: a full stderr pipe would deadlock the child. Without
+        # a writable temp folder (read-only file system) the log is dropped instead.
+        try:
+            log_root = Path(log_dir) if log_dir else Path(tempfile.gettempdir())
+            log_root.mkdir(parents=True, exist_ok=True)
+            self._stderr = tempfile.NamedTemporaryFile(prefix="vouchai-zone-b-",
+                                                       suffix=".log", dir=log_root,
+                                                       delete=False)
+        except OSError:
+            self._stderr = None
         cmd = [sys.executable, "-m", "vouchai", "serve", "--mode", mode,
                "--time-limit", str(time_limit_s or 0)]
         self._proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                      stderr=self._stderr, env=env, cwd=str(PACKAGE_ROOT),
+                                      stderr=self._stderr or subprocess.DEVNULL, env=env,
+                                      cwd=str(PACKAGE_ROOT),
                                       **(popen_kwargs or {}))
         self.pid = self._proc.pid
         self._next_id = 0
@@ -150,15 +156,16 @@ class ProcessEnv:
                     stream.close()
                 except OSError:
                     pass
-            self._stderr.close()
             self._proc = None
-            # keep the zone B log only when it says something (a crash)
-            try:
-                path = Path(self._stderr.name)
-                if path.stat().st_size == 0:
-                    path.unlink()
-            except OSError:
-                pass
+            if self._stderr is not None:
+                self._stderr.close()
+                # keep the zone B log only when it says something (a crash)
+                try:
+                    path = Path(self._stderr.name)
+                    if path.stat().st_size == 0:
+                        path.unlink()
+                except OSError:
+                    pass
 
     def __enter__(self) -> ProcessEnv:
         return self

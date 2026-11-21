@@ -78,7 +78,8 @@ _BASE: dict[str, Any] = {
     "mix": "regular",
     "errors": _errors({t: {"range": [0, 2]} for t in ERROR_TYPES}),
     "interactions": {"partial_fx_boundary": 0, "duplicate_with_partial": 0},
-    "distractors": {"density": "0.3", "phantom_targets": True, "require": []},
+    "distractors": {"density": "0.3", "phantom_targets": True, "require": [],
+                    "d23_max_lead_s": None},
     # lenient: an error without any admissible target is skipped late (recorded in
     # provenance.unplaced_errors) and X1/X2 fall back to each other; strict: never.
     "placement": "lenient",
@@ -316,6 +317,9 @@ def validate(cfg: dict[str, Any]) -> None:
     if "boundary" in require and cfg["company"]["timezone"] == "+00:00":
         raise ConfigError("distractors.require 'boundary' needs a company timezone other "
                           "than +00:00 (local and UTC dates must differ)")
+    cap = cfg["distractors"]["d23_max_lead_s"]
+    if cap is not None and (type(cap) is not int or cap <= 0):
+        raise ConfigError("distractors.d23_max_lead_s must be null or a positive int")
     density = _fraction(cfg["distractors"]["density"], "distractors.density")
     if not 0 <= density <= Fraction(6, 10):
         raise ConfigError("distractors.density must be within [0, 0.6]")

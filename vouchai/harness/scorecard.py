@@ -307,23 +307,25 @@ def scorecard(n_seeds: int = 20) -> tuple[str, Fraction]:
     ]
     eng = engineering_items()
     total = Fraction(0)
-    lines = ["# Scorecard (our interpretation of section 10)", "",
+    lines = ["# Internal checklist (not a score)", "",
+             "Written before the jury published its check definitions (20.11.2026); the "
+             "jury's own checks are emulated in `reports/JURY_SELFTEST.md`. This list only "
+             "says which of our own checks pass on fresh random 64-bit seeds; it awards no "
+             "points.", "",
              f"Versions: {VERSIONS}. Fresh 64-bit seeds: {rnd}.", ""]
     for title, weight, checks in sections:
         passed = sum(1 for _, ok in checks if ok)
-        score = Fraction(weight * passed, len(checks))
-        total += score
-        lines += [f"## {title}: {passed}/{len(checks)} -> "
-                  f"{score.numerator / score.denominator:.2f} of {weight}", ""]  # float-ok
+        total += Fraction(weight * passed, len(checks))
+        lines += [f"## {title}: {passed}/{len(checks)} checks pass", ""]
         lines += [f"- [{'x' if ok else ' '}] {name}" for name, ok in checks] + [""]
     eng_score = sum(s for _, s in eng)
     total += eng_score
-    lines += [f"## Engineering and explanation: {eng_score} of 10", ""]
-    lines += [f"- {s}/2 {name}" for name, s in eng] + [""]
+    lines += ["## Engineering artefacts present", ""]
+    lines += [f"- {'yes' if s else 'no'}: {name}" for name, s in eng] + [""]
     passed = sum(1 for _, _, checks in sections for _, ok in checks if ok)
     count = sum(len(checks) for _, _, checks in sections)
     lines += [f"**Self-check: {passed} of our {count} checks pass. "
               "The jury gives the points with its own checks.**", "",
-              "Engineering items are listed by the presence of artefacts; the jury scores "
-              "them 0/1/2.", ""]
+              "Engineering artefacts are listed by presence only; the jury scores them 0/1/2.",
+              ""]
     return "\n".join(lines), total

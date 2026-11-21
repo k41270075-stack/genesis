@@ -109,6 +109,8 @@ def legit_posting(world: World, stream: Stream, event: datetime) -> datetime:
         # the lead comes from the same distribution as any delay (up to 3 days), so a
         # long lead before the document also happens in clean books (D23)
         early = sample_delay(stream)
+        if world.d23_max_lead_s:              # diagnostics: the behaviour before 1.2.0
+            early = min(early, world.d23_max_lead_s)
         room_before = utc_seconds(event) - utc_seconds(lo) - MIN_GAP_S - 61
         if room_before >= 60:
             early = min(early, room_before)

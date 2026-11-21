@@ -82,23 +82,35 @@ class LocalEnv:
               options: dict | None = None) -> tuple[dict, dict]:
         if self._finalized:
             raise RunFinalized("RUN_FINALIZED")
+        started = self._clock()              # the time limit runs from the start of reset
         options = options or {}
         if not isinstance(options, dict):
             raise ValueError("options must be an object")
-        if options.get("episode_dir"):
-            episode = load_episode(options["episode_dir"])
-            if not episode.provenance.get("truth_found") and not options.get("no_truth"):
-                raise ValueError("no truth.json in the episode folder (private/truth.json or "
-                                 "truth.json); pass options={'no_truth': True} to play "
-                                 "without grading")
-        else:
-            if config is None:
-                config = options.get("config")
-            if seed is None:
-                seed = self._next_seed
-                self._next_seed += 1
-            check_seed(seed)
-            episode = generate_episode(seed, config, self._key)
+        spent_ms = options.get("spent_ms", 0)     # time the caller spent before this call
+        if type(spent_ms) is not int or spent_ms < 0:
+            raise ValueError("options.spent_ms must be a non-negative int")
+        try:
+            if options.get("episode_dir"):
+                episode = load_episode(options["episode_dir"])
+                if not episode.provenance.get("truth_found") and not options.get("no_truth"):
+                    raise ValueError("no truth.json in the episode folder (private/truth.json "
+                                     "or truth.json); pass options={'no_truth': True} to "
+                                     "play without grading")
+            else:
+                if config is None:
+                    config = options.get("config")
+                if seed is None:
+                    seed = self._next_seed
+                    self._next_seed += 1
+                check_seed(seed)
+                episode = generate_episode(seed, config, self._key)
+        except Exception:
+            # a failed reset never leaves the previous episode playable
+            if self._episode is not None and not self._done:
+                self._finish("reset", None)
+            self._episode = None
+            self._sandbox = None
+            raise
         if self._episode is not None and not self._done:
             self._finish("reset", None)          # only once the new episode exists
         self._episode = episode
@@ -119,7 +131,7 @@ class LocalEnv:
         info = {"episode_id": episode.episode_id, "mode": self.mode,
                 "schema_version": VERSIONS["schema_version"],
                 "env_version": VERSIONS["env_version"]}
-        self._t0 = self._clock()
+        self._t0 = started - spent_ms / 1000   # float-ok: seconds of the monotonic clock
         return observation, info
 
     def step(self, action: Any) -> tuple[dict, float, bool, bool, dict]:
