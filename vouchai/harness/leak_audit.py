@@ -30,7 +30,22 @@ FEATURES = {
     # look-alikes around the object: a cluster of doubles must not mark an error
     # (what "phantom targets" guard against)
     "lookalikes_nearby": lambda d, ts, amount, pos: d["_neighbours"],
+    # classic journal-entry testing filters (ISA 240; the "control points" of
+    # MindBridge-like tools): they must find nothing either
+    "benford_first_two_digits": lambda d, ts, amount, pos: _first_two_digits(amount),
+    "hour_of_day": lambda d, ts, amount, pos: ts.hour,
+    "off_hours_or_weekend": lambda d, ts, amount, pos: int(ts.hour < 8 or ts.hour >= 19
+                                                            or ts.weekday() >= 5),
+    "multiple_of_100_units": lambda d, ts, amount, pos: int(amount % 10000 == 0),
 }
+
+
+def _first_two_digits(amount: int) -> int:
+    """Benford's law ranks amounts by their first two digits: the expected
+    frequency falls monotonically from 10 to 99, so the two digits themselves give
+    the same ranking (and AUC) as the Benford surprisal, exactly."""
+    text = str(abs(int(amount)))
+    return int(text[:2]) if len(text) >= 2 else int(text) * 10
 
 
 def auc(pos: list[Any], neg: list[Any]) -> Fraction | None:

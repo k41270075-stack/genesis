@@ -172,5 +172,13 @@ class SpyTest(unittest.TestCase):
         self.assertEqual(first[0]["return"], -1.0)
 
 
+class CombinedAttackSearchTest(unittest.TestCase):
+    def test_no_combination_of_surface_features_beats_the_threshold(self):
+        from vouchai.harness.attack_search import THRESHOLD, search
+        result = search(range(6100, 6110))
+        self.assertGreater(result["candidates"], 300)
+        self.assertLessEqual(result["max_f1"], THRESHOLD, result["top"][0][0])
+
+
 if __name__ == "__main__":
     unittest.main()

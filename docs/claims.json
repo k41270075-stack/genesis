@@ -130,6 +130,34 @@
     "tests.test_jury_pairs.JuryPairsTest"
    ],
    "command": "python -m vouchai judge-selftest"
+  },
+  {
+   "id": "matcher_exhaustive",
+   "criterion": "Reward reliability",
+   "claim": "the matcher equals a brute force over every bipartite graph up to 4x4 (74 954 graphs) and keeps metamorphic properties on 2 000 random answers",
+   "tests": [
+    "tests.test_matcher_exhaustive.ExhaustiveMatchingTest",
+    "tests.test_matcher_exhaustive.MetamorphicTest"
+   ],
+   "command": "python -m unittest tests.test_matcher_exhaustive"
+  },
+  {
+   "id": "attack_search",
+   "criterion": "Reward reliability",
+   "claim": "no combination of surface features (conjunctions of 2-3 attacks, unions, amount hedging, caps) reaches micro F1 0.2",
+   "tests": [
+    "tests.test_attacks.CombinedAttackSearchTest"
+   ],
+   "command": "python -m vouchai attack-search"
+  },
+  {
+   "id": "hardening",
+   "criterion": "Contract and isolation",
+   "claim": "on Linux zone B is non-dumpable: a process of the same OS user cannot read /proc/<pid>/{environ,maps,mem,fd}",
+   "tests": [
+    "tests.test_harden.HardeningTest"
+   ],
+   "command": "docker run --rm --network none --read-only --tmpfs /tmp vouchai eval --isolated --policy simple_reconciler --config jury_like --seeds 0:3 --spy"
   }
  ]
 }

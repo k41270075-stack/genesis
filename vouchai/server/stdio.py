@@ -27,6 +27,7 @@ from ..version import VERSIONS
 from .local import MAX_STEPS, LocalEnv, RunFinalized
 
 MAX_LINE_BYTES = 16 * 1024 * 1024   # an escaped 1 MB action fits
+HARDENING: dict[str, bool] = {}       # what harden_process() applied (CLI zone B only)
 
 
 def _read_line(stream: BinaryIO) -> bytes | None:
@@ -60,7 +61,7 @@ def handle(env: LocalEnv, request: Any) -> tuple[dict[str, Any], bool]:
 
     if method == "hello":
         return {"id": rid, "result": {**VERSIONS, "mode": env.mode, "max_steps": MAX_STEPS,
-                                      "limits": env.limits()}}, True
+                                      "limits": env.limits(), "hardening": HARDENING}}, True
     if method == "reset":
         try:
             obs, info = env.reset(params.get("seed"), params.get("config"), params.get("options"))
