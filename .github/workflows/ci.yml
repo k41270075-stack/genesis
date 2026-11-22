@@ -35,7 +35,7 @@ jobs:
 
       - name: learning on the reward (student climbs, cracker stays at silence)
         if: runner.os == 'Linux' && matrix.python == '3.12'
-        run: python -m unittest vouchai_learn.test_learning -v
+        run: python -m unittest vouchai_learn.test_learning vouchai_learn.test_sft -v
 
       - name: check from a Cyrillic path with spaces (Windows)
         if: runner.os == 'Windows'

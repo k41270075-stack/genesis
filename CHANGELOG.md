@@ -17,8 +17,11 @@
   «взломщик» на 11 дешёвых трюках за 30 обновлений не выше молчания (−0,426).
 - `vouchai_learn.gym_env.VouchAIGymEnv` — обёртка в стиле `gymnasium.Env`
   (JSON-текст на входе и выходе; `gymnasium` необязателен).
-- Тесты `vouchai_learn/test_learning.py` (отдельно от `check`, около 3 минут; в CI —
-  отдельный шаг). README, `docs/LIMITATIONS.md` (строки 12–13), `docs/DATASHEET.md`.
+- `python -m vouchai_learn.sft` → `sft/train.jsonl`, `sft/dev.jsonl`: данные для
+  дообучения LLM — 40 проверенных эпизодов скриптового аудитора в чат-формате
+  (651 действие), без эталона, побайтно воспроизводимы.
+- Тесты `vouchai_learn/test_learning.py`, `vouchai_learn/test_sft.py` (отдельно от
+  `check`, около 3 минут; в CI — отдельный шаг). README, `docs/LIMITATIONS.md` (строки 12–13), `docs/DATASHEET.md`.
 
 ## 1.3.1 — 2026-11-22 (сдача)
 

@@ -160,8 +160,8 @@ def report(student: Curve, cracker: Curve, silence: float, reference: float) -> 
         "auditor uses, `docs/LIMITATIONS.md` row 11). It shows that the reward is a usable "
         "training signal (an agent following it climbs from silence to the reference level "
         "on unseen episodes) and that the same signal does not pay for the known tricks. "
-        "Training an LLM auditor on `trajectories.jsonl` and the environment is the next "
-        "step.",
+        "Next step: supervised fine-tuning of an LLM auditor on `sft/train.jsonl` "
+        "(`python -m vouchai_learn.sft`), then RL on this reward.",
         "",
     ])
 

@@ -634,9 +634,18 @@ claimed_amount_minor: expected_amount_minor, currency, evidence_ids, explanation
   `gymnasium.Env` (наблюдения и действия — JSON-текст; если установлен `gymnasium`,
   класс наследует `gymnasium.Env` и регистрируется как `VouchAI-v0`). Ядро
   по-прежнему без зависимостей.
-- Проверка: `python -m unittest vouchai_learn.test_learning` (ученик поднимается выше
-  +0,5, «взломщик» не выше молчания, обёртка; около 3 минут, поэтому отдельно от
-  `python -m vouchai check`).
+- **Данные для дообучения LLM:** [`sft/`](sft/README.md) — 40 эпизодов (651 действие)
+  в общем чат-формате: `system`, `user` = наблюдение JSON, `assistant` = действие JSON,
+  плюс `meta` (награда, TP/FP/FN). Демонстрации — скриптовый аудитор через обычный API
+  в режиме train, только проверенные (награда ≥ 0,9, без ложных обвинений). train —
+  10 открытых эпизодов + 20 свежих `jury_like`, dev — 10 открытых; сканер утечек по
+  каждой строке, пересборка побайтно совпадает. Больше данных:
+  `python -m vouchai_learn.sft --extra N`. Цикл для LLM: SFT на `train.jsonl` → замер
+  как политики на dev и свежих seed → RL на награде среды.
+- Проверка: `python -m unittest vouchai_learn.test_learning vouchai_learn.test_sft`
+  (ученик поднимается выше +0,5, «взломщик» не выше молчания, обёртка; транскрипты
+  проигрываются в среде шаг в шаг, без эталона, совпадают с опубликованными; около
+  3 минут, поэтому отдельно от `python -m vouchai check`).
 
 ## Траектории и разбор сбоев
 
@@ -779,6 +788,7 @@ python -m vouchai judge-selftest [--quick] [--no-write] # 80 проверок ж
 python -m vouchai judge-recipes --seeds 0:40 --write    # D01–D20 × 40 seed -> reports/RECIPES.md
 python -m vouchai attack-search                         # 390 комбинированных атак -> reports/ATTACK_SEARCH.md
 python -m vouchai_learn                                 # ученик и «взломщик» учатся -> reports/LEARNING.md
+python -m vouchai_learn.sft [--extra N]                 # данные для дообучения LLM -> sft/
 python -m vouchai demo [--seed 28112026]                # аудитор проходит эпизод + таблица политик
 python -m vouchai generate --seed 7 --config jury_like --out ep7
 python -m vouchai_verify ep7 --report --passport        # независимый проверяльщик
@@ -823,7 +833,7 @@ results = env.finalize()             # P, R, F1, return, steps, termination по
 | Траектории | `trajectories.jsonl` |
 | Записка о дизайне | `docs/DESIGN.md`, `docs/STANDARDS.md` |
 | Диагностика и разбор сбоев | `reports/` |
-| Обучаемость награды (сверх раздела 09) | `vouchai_learn/`, `reports/LEARNING.md` |
+| Обучаемость награды и данные для LLM (сверх раздела 09) | `vouchai_learn/`, `reports/LEARNING.md`, `sft/` |
 | Ограничения и карточка данных | `docs/LIMITATIONS.md`, `docs/DATASHEET.md` |
 
 ## Структура репозитория
@@ -836,7 +846,8 @@ results = env.finalize()             # P, R, F1, return, steps, termination по
 | `vouchai/server/` | протокол зоны B, клиент, защита процесса (`harden.py`) |
 | `vouchai/harness/` | прогоны, преобразования, повтор, отчёты, рецепты, эмулятор жюри, поиск атак |
 | `vouchai_verify/` | независимый проверяльщик (не импортирует `vouchai`) и скриптовый аудитор |
-| `vouchai_learn/` | обучение на награде (REINFORCE, ученик и «взломщик»), обёртка в стиле Gymnasium; клиент среды, в ядро не входит |
+| `vouchai_learn/` | обучение на награде (REINFORCE, ученик и «взломщик»), выгрузка SFT, обёртка в стиле Gymnasium; клиент среды, в ядро не входит |
+| `sft/` | данные для дообучения LLM: эпизоды-диалоги train/dev |
 | `recipes/` | `team_config` сценариев D01–D20 |
 | `examples/matcher_fixture/` | ручная фикстура matcher |
 | `episodes/`, `episodes.jsonl`, `trajectories.jsonl` | открытые эпизоды, индекс, траектории |

@@ -17,6 +17,7 @@ COPY pyproject.toml README.md LICENSE NOTICE CHANGELOG.md Dockerfile episodes.js
 COPY vouchai /app/vouchai
 COPY vouchai_verify /app/vouchai_verify
 COPY vouchai_learn /app/vouchai_learn
+COPY sft /app/sft
 COPY tests /app/tests
 COPY schemas /app/schemas
 COPY docs /app/docs
