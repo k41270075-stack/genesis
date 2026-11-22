@@ -16,7 +16,7 @@ dependencies = []
 vouchai = "vouchai.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["vouchai*", "vouchai_verify*"]
+include = ["vouchai*", "vouchai_verify*", "vouchai_learn*"]
 
 [tool.ruff]
 target-version = "py310"

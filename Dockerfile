@@ -16,6 +16,7 @@ WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE CHANGELOG.md Dockerfile episodes.jsonl trajectories.jsonl judge_adapter.py /app/
 COPY vouchai /app/vouchai
 COPY vouchai_verify /app/vouchai_verify
+COPY vouchai_learn /app/vouchai_learn
 COPY tests /app/tests
 COPY schemas /app/schemas
 COPY docs /app/docs

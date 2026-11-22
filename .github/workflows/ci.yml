@@ -33,6 +33,10 @@ jobs:
           PYTHONHASHSEED: "0"
         run: python -m vouchai check --out "$RUNNER_TEMP/vouchai"
 
+      - name: learning on the reward (student climbs, cracker stays at silence)
+        if: runner.os == 'Linux' && matrix.python == '3.12'
+        run: python -m unittest vouchai_learn.test_learning -v
+
       - name: check from a Cyrillic path with spaces (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
