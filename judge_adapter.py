@@ -206,11 +206,11 @@ class JudgeEnv:
         else:
             obs, info = env.reset(seed, _team_config(config.get("team_config")),
                                   {"spent_ms": spent_ms})
+        # exactly the four keys of the jury definitions; the helpers go to info
         first = {"task": obs["task"], "manifest": obs["manifest"], "policy": obs["policy"],
-                 "remaining_steps": obs["steps_remaining"],
-                 "tools": list(ACTIONS), "limits": obs["limits"],
-                 "action_formats": JUDGE_ACTION_FORMATS}
-        return first, dict(info, mode=mode)
+                 "remaining_steps": obs["steps_remaining"]}
+        return first, dict(info, mode=mode, tools=list(ACTIONS), limits=obs["limits"],
+                           action_formats=JUDGE_ACTION_FORMATS)
 
     def step(self, action: Any) -> tuple[dict, float, bool, bool, dict]:
         if self._env is None:

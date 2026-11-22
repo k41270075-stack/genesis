@@ -87,7 +87,7 @@ def _contract(ctx: Ctx, quick: bool) -> list[tuple[str, bool, str]]:
     def c02():
         obs, info = ctx.reset()
         text = json.dumps([obs, info])
-        need = all(k in obs for k in ("task", "manifest", "policy", "remaining_steps"))
+        need = set(obs) == {"task", "manifest", "policy", "remaining_steps"}   # exactly
         leaks = [m for m in SECRET_MARKERS if m in text] + (["seed"] if '"seed"' in text else [])
         return need and obs["remaining_steps"] == 100 and not leaks, f"leaks={leaks}"
 

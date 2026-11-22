@@ -44,8 +44,7 @@ class AdapterTest(unittest.TestCase):
 
     def test_first_observation(self):
         obs, info = self.closed()
-        for key in ("task", "manifest", "policy"):
-            self.assertIn(key, obs)
+        self.assertEqual(set(obs), {"task", "manifest", "policy", "remaining_steps"})
         self.assertEqual(obs["remaining_steps"], 100)
         self.assertNotIn("steps_remaining", obs)
         self.assertEqual(info["mode"], "closed")
@@ -53,7 +52,8 @@ class AdapterTest(unittest.TestCase):
         self.assertNotIn('"iss_', text)
         self.assertNotIn("expected_amount_minor", text)
         self.assertNotIn("evidence_slots", text)
-        for fmt in obs["action_formats"].values():
+        self.assertEqual(set(info["action_formats"]), set(info["tools"]))
+        for fmt in info["action_formats"].values():
             self.assertIn("name", fmt)
             self.assertIn("args", fmt)
 
