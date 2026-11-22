@@ -260,7 +260,7 @@ def main(argv: list[str] | None = None) -> int:
         from .checks import run_check
         return run_check(args.out, full=args.full, pattern=args.pattern)
     if args.command == "version":
-        print(json.dumps(VERSIONS, indent=2))
+        print(json.dumps({"package_version": "1.3.2", **VERSIONS}, indent=2))
         return 0
     parser.print_help()
     return 0

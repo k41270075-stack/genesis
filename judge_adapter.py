@@ -199,9 +199,13 @@ class JudgeEnv:
         env = self._ensure(MODES[mode])
         spent_ms = int((time.monotonic() - started) * 1000)
         if config.get("episode_dir"):
-            # the closed files may stay with the jury: scoring is score_episode's job
-            options = {"episode_dir": str(config["episode_dir"]), "no_truth": True,
-                       "spent_ms": spent_ms}
+            # closed: the truth stays with the jury, scoring is score_episode's job;
+            # train: the terminal reward needs the episode's own truth when it is there
+            root = Path(config["episode_dir"])
+            has_truth = any(p.is_file() for p in (root / "private" / "truth.json",
+                                                  root / "truth.json"))
+            options = {"episode_dir": str(root),
+                       "no_truth": mode == "closed" or not has_truth, "spent_ms": spent_ms}
             obs, info = env.reset(seed, None, options)
         else:
             obs, info = env.reset(seed, _team_config(config.get("team_config")),
